@@ -54,10 +54,16 @@ def trash_info_date(fname):
 def main(args):
   #Load and set configuration options
   parser = optparse.OptionParser()
-  parser.set_defaults(days=30, dryrun=False)
+  parser.set_defaults(days=30, dryrun=False, verbose=False)
   parser.add_option("-d", "--days", dest='days', help='Delete files older then this DAYS number of days', metavar="DAYS")
+  parser.add_option("--verbose", action='store_true', dest='verbose', help='Verbose')
   parser.add_option("--dry-run", action='store_true', dest='dryrun', help='Just list what would have been done')
+  parser.add_option("--version", action='store_true', dest='version', help='Show version and exit')
   (options, args) = parser.parse_args()
+  
+  if options.version:
+    print '''Version 0.0.1 \nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\n License GPLv3+'''
+  
   options.days = int(options.days)
   if options.days <= 0:
     print 'Can not work with negative or zero days'
@@ -71,6 +77,10 @@ def main(args):
     #Calculate seconds from now
     seconds_old = time.time() - time.mktime(file_time)
     days_old = int(math.floor(seconds_old/(3600.0*24.0)))
+    if options.verbose:
+      print 'File',file_name
+      print '  is',days_old,'days old (',seconds_old,' seconds)'
+      print '  deletion date was', time.strftime('%c', file_time)
     if days_old > options.days:
       purge(file_name, options.dryrun)
       if options.dryrun:
