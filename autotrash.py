@@ -54,22 +54,27 @@ def trash_info_date(fname):
 def main(args):
   #Load and set configuration options
   parser = optparse.OptionParser()
-  parser.set_defaults(days=30, dryrun=False, verbose=False)
-  parser.add_option("-d", "--days", dest='days', help='Delete files older then this DAYS number of days', metavar="DAYS")
+  parser.set_defaults(days=30, dryrun=False, verbose=False,trash_path='~/.local/share/Trash')
+  parser.add_option("-d", "--days", dest='days', help='Delete files older then this DAYS number of days', metavar='PATH')
+  parser.add_option("-T", "--trash-path", dest='trash_path', help='Set Trash path to PATH', metavar='PATH')
   parser.add_option("--verbose", action='store_true', dest='verbose', help='Verbose')
   parser.add_option("--dry-run", action='store_true', dest='dryrun', help='Just list what would have been done')
   parser.add_option("--version", action='store_true', dest='version', help='Show version and exit')
   (options, args) = parser.parse_args()
   
   if options.version:
-    print '''Version 0.0.1 \nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\n License GPLv3+'''
+    print '''Version 0.0.2 \nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\n License GPLv3+'''
   
   options.days = int(options.days)
   if options.days <= 0:
     print 'Can not work with negative or zero days'
     return 0
-  
-  for file_name in glob.iglob(os.path.expanduser('~/.local/share/Trash/info/*.trashinfo')):
+  trash_info_path = os.path.expanduser(options.trash_path + '/info')
+  if not os.path.exists(trash_info_path):
+    print 'Cannot find trash information directory. Make sure you have at least GNOME 2.24'
+    print 'Should be at:', trash_info_path
+    return 1
+  for file_name in glob.iglob('%s/*.trashinfo' % trash_info_path):
     #print 'Loading file',file_name
     file_time = trash_info_date(file_name)
     if file_time == None:
