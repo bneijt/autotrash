@@ -1,9 +1,21 @@
-Autotrash is a small python script to automatically remove (permenantly delete) old FreeDesktop.org Trash files.
+Autotrash is a small python script to automatically removes
+(permenantly delete) old FreeDesktop.org Trash files.
 
-It scans the ~/local/share/Trash/info directory and reads the .trashinfo files. Files older then X days will be removed.
+It scans the ~/.local/share/Trash/info directory and reads the .trashinfo
+files to determine their deletion date. Files older then 30 days are
+then removed including their trash information file.
 
+You can configure the number of days using commandline parameters, use
+the command "./autotrash.py --help" for more information.
+
+        INSTALLATION
 It should be considered to be run as a crontab:
 
 @daily  $HOME/bin/autotrash.py
 
-Homepage: http://logfish.net/pr/autotrash
+If you do not know how to work with crontab, you can add it to the startup 
+programs in GNOME using the menu: System -> Preferences -> Sessions
+
+Add the program with the "+ Add" button.
+
+Homepage: http://logfish.net/pr/autotrash/

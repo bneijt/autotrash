@@ -25,9 +25,13 @@ import os.path
 import time
 import math
 
+def trash_file_name(trash_name):
+  '''Get data file from trashinfo file'''
+  return os.path.basename(trash_name)[:-10]
+
 def purge(trash_name, dryrun):
   '''Purge the file behind the trash file fname'''
-  file_name = os.path.basename(trash_name)[:-10]
+  file_name = trash_file_name(trash_name)
   target = os.path.expanduser('~/.local/share/Trash/files/')+file_name
   if dryrun:
     print 'Remove',target
@@ -54,10 +58,11 @@ def trash_info_date(fname):
 def main(args):
   #Load and set configuration options
   parser = optparse.OptionParser()
-  parser.set_defaults(days=30, dryrun=False, verbose=False,trash_path='~/.local/share/Trash')
+  parser.set_defaults(days=30, dryrun=False, verbose=False,trash_path='~/.local/share/Trash', check=False)
   parser.add_option("-d", "--days", dest='days', help='Delete files older then this DAYS number of days', metavar='PATH')
   parser.add_option("-T", "--trash-path", dest='trash_path', help='Set Trash path to PATH', metavar='PATH')
   parser.add_option("--verbose", action='store_true', dest='verbose', help='Verbose')
+  parser.add_option("--check", action='store_true', dest='check', help='Report .trashinfo files without a real file')
   parser.add_option("--dry-run", action='store_true', dest='dryrun', help='Just list what would have been done')
   parser.add_option("--version", action='store_true', dest='version', help='Show version and exit')
   (options, args) = parser.parse_args()
@@ -75,6 +80,9 @@ def main(args):
     print 'Should be at:', trash_info_path
     return 1
   for file_name in glob.iglob('%s/*.trashinfo' % trash_info_path):
+    if options.check:
+      if not os.path.exists(trash_file_name(file_name)):
+        print file_name,'has no real file associated with it.'
     #print 'Loading file',file_name
     file_time = trash_info_date(file_name)
     if file_time == None:
