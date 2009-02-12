@@ -59,9 +59,9 @@ def main(args):
   #Load and set configuration options
   parser = optparse.OptionParser()
   parser.set_defaults(days=30, dryrun=False, verbose=False,trash_path='~/.local/share/Trash', check=False)
-  parser.add_option("-d", "--days", dest='days', help='Delete files older then this DAYS number of days', metavar='PATH')
-  parser.add_option("-T", "--trash-path", dest='trash_path', help='Set Trash path to PATH', metavar='PATH')
-  parser.add_option("--verbose", action='store_true', dest='verbose', help='Verbose')
+  parser.add_option("-d", "--days", dest='days', help='Delete files older then this DAYS number of days', metavar='DAYS')
+  parser.add_option("-T", "--trash-path", dest='trash_path', help='Set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
+  parser.add_option("--verbose", action='store_true', dest='verbose', help='Be more verbose, a must when testing something out')
   parser.add_option("--check", action='store_true', dest='check', help='Report .trashinfo files without a real file')
   parser.add_option("--dry-run", action='store_true', dest='dryrun', help='Just list what would have been done')
   parser.add_option("--version", action='store_true', dest='version', help='Show version and exit')

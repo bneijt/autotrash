@@ -1,0 +1,3 @@
+- Check if python xdg has support for trash files and use that if possible
+- Add an interactive mode?
+- Add an option to have it register itself with crontab (a install yourself option)
