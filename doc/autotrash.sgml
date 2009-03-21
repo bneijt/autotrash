@@ -44,7 +44,7 @@ manpage.1: manpage.sgml
       &dhsurname;
     </author>
     <copyright>
-      <year>2003</year>
+      <year>2009</year>
       <holder>&dhusername;</holder>
     </copyright>
     &dhdate;
@@ -63,9 +63,7 @@ manpage.1: manpage.sgml
     <cmdsynopsis>
       <command>&dhpackage;</command>
 
-      <arg><option>-e <replaceable>this</replaceable></option></arg>
-
-      <arg><option>--example <replaceable>that</replaceable></option></arg>
+      <arg><option>-d <replaceable>n_days_old</replaceable></option></arg>
     </cmdsynopsis>
   </refsynopsisdiv>
   <refsect1>
@@ -86,12 +84,40 @@ manpage.1: manpage.sgml
   <refsect1>
     <title>OPTIONS</title>
 
-    <para>These programs follow the usual &gnu; command line syntax,
-      with long options starting with two dashes (`-').  A summary of
-      options is included below.  For a complete description, see the
-      <application>Info</application> files.</para>
-
+    <para>This program follows the usual &gnu; command line syntax,
+      with long options starting with two dashes (`-').</para>
     <variablelist>
+      <varlistentry>
+        <term><option>-h</option>
+          <option>--help</option>
+        </term>
+        <listitem>
+          <para>Show summary of options.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-d <replaceable>DAYS</replaceable></option>
+          <option>--days <replaceable>DAYS</replaceable></option>
+        </term>
+        <listitem>
+          <para>Delete files older then DAYS number of days. Default: 30</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-T <replaceable>PATH</replaceable></option>
+          <option>--trash-path <replaceable>PATH</replaceable></option>
+        </term>
+        <listitem>
+          <para>Use the given path as the location of the Trash directory, instead of the default: ~/.local/share/Trash .</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--verbose</option>
+        </term>
+        <listitem>
+          <para>Output information on what is happening and why.</para>
+        </listitem>
+      </varlistentry>
       <varlistentry>
         <term><option>--check</option>
         </term>
@@ -100,11 +126,10 @@ manpage.1: manpage.sgml
         </listitem>
       </varlistentry> 
       <varlistentry>
-        <term><option>-h</option>
-          <option>--help</option>
+        <term><option>--dry-run</option>
         </term>
         <listitem>
-          <para>Show summary of options.</para>
+          <para>Only list what would be done, but actually do nothing.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -117,6 +142,7 @@ manpage.1: manpage.sgml
       </varlistentry>
     </variablelist>
   </refsect1>
+<!--
   <refsect1>
     <title>SEE ALSO</title>
 
@@ -126,13 +152,14 @@ manpage.1: manpage.sgml
       Fall of a Fooish Bar</citetitle> available via the
       <application>Info</application> system.</para>
   </refsect1>
+-->
   <refsect1>
     <title>AUTHOR</title>
 
     <para>This manual page was written by &dhusername; &dhemail; for
       the &debian; system (and may be used by others).  Permission is
       granted to copy, distribute and/or modify this document under
-      the terms of the &gnu; General Public License, Version 2 any
+      the terms of the &gnu; General Public License, Version 3 any
       later version published by the Free Software Foundation.
     </para>
     <para>

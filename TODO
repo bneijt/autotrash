@@ -1,3 +1,5 @@
-- Check if python xdg has support for trash files and use that if possible
-- Add an interactive mode?
-- Add an option to have it register itself with crontab (a install yourself option)
+- Add an option to have it register itself with crontab (an install yourself option).
+
+Long term / per request:
+- Move to python XDG as soon as it supports Trash information files
+- Add an interactive mode? Someone will have to request this per mail if this is really needed or even wanted.

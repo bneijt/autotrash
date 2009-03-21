@@ -67,16 +67,16 @@ def main(args):
   #Load and set configuration options
   parser = optparse.OptionParser(usage='%prog')
   parser.set_defaults(days=30, dryrun=False, verbose=False,trash_path=os.path.join('~','.local','share','Trash'), check=False)
-  parser.add_option("-d", "--days", dest='days', type='int', help='Delete files older then this DAYS number of days', metavar='DAYS')
-  parser.add_option("-T", "--trash-path", dest='trash_path', help='Set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
-  parser.add_option("--verbose", action='store_true', dest='verbose', help='Be more verbose, a must when testing something out')
-  parser.add_option("--check", action='store_true', dest='check', help='Report .trashinfo files without a real file')
-  parser.add_option("--dry-run", action='store_true', dest='dryrun', help='Just list what would have been done')
-  parser.add_option("--version", action='store_true', dest='version', help='Show version and exit')
+  parser.add_option('-d', '--days', dest='days', type='int', help='Delete files older then DAYS number of days. Default: %i' % parser.defaults['days'], metavar='DAYS')
+  parser.add_option('-T', '--trash-path', dest='trash_path', help='Set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
+  parser.add_option('--verbose', action='store_true', dest='verbose', help='Be more verbose, a must when testing something out')
+  parser.add_option('--check', action='store_true', dest='check', help='Report .trashinfo files without a real file')
+  parser.add_option('--dry-run', action='store_true', dest='dryrun', help='Just list what would have been done')
+  parser.add_option('-v', '--version', action='store_true', dest='version', help='Show version and exit')
   (options, args) = parser.parse_args()
   
   if options.version:
-    print '''Version 0.0.2 \nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\n License GPLv3+'''
+    print '''Version 0.0.3 \nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\n License GPLv3+'''
   
   if options.days <= 0:
     parser.error('Can not work with negative or zero days')
