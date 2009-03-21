@@ -96,7 +96,7 @@ manpage.1: manpage.sgml
         <term><option>--check</option>
         </term>
         <listitem>
-          <para>Report .trashinfo files that point to a non-existing file. This will only happen with a broken Trash can and autotrash will not touch these files. It is left up to the user to actually do something with this information.</para>
+          <para>Report .trashinfo files that point to a non-existing file. This will only happen with a broken Trash can and autotrash will not touch these files. It is left up to the user to actually do something with this information. As soon as the files become old enough, they will be removed automatically.</para>
         </listitem>
       </varlistentry> 
       <varlistentry>

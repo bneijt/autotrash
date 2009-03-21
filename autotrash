@@ -26,16 +26,24 @@ import time
 import math
 
 def trash_file_name(trash_name):
-  '''Get data file from trashinfo file'''
-  return os.path.basename(trash_name)[:-10]
+  '''Get data file name from trashinfo file name: basename without extension'''
+  basename = os.path.basename(trash_name)
+  (data_name, ext) = os.path.splitext(basename)
+  return data_name
 
-def purge(trash_name, dryrun):
+def purge(trash_directory, trash_name, dryrun):
   '''Purge the file behind the trash file fname'''
   file_name = trash_file_name(trash_name)
-  target = os.path.expanduser('~/.local/share/Trash/files/')+file_name
+  target = os.path.join(trash_directory, 'files', file_name)
   if dryrun:
-    print 'Remove',target
-    print 'Remove',trash_name
+    if os.path.exists(target):
+      print ' Remove ', target
+    else:
+      print '[Remove]', target
+    if os.path.exists(trash_name):
+      print ' Remove ', trash_name
+    else:
+      print '[Remove]', trash_name
     return False
   if os.path.exists(target):
     if os.path.isdir(target):
@@ -57,9 +65,9 @@ def trash_info_date(fname):
 
 def main(args):
   #Load and set configuration options
-  parser = optparse.OptionParser()
-  parser.set_defaults(days=30, dryrun=False, verbose=False,trash_path='~/.local/share/Trash', check=False)
-  parser.add_option("-d", "--days", dest='days', help='Delete files older then this DAYS number of days', metavar='DAYS')
+  parser = optparse.OptionParser(usage='%prog')
+  parser.set_defaults(days=30, dryrun=False, verbose=False,trash_path=os.path.join('~','.local','share','Trash'), check=False)
+  parser.add_option("-d", "--days", dest='days', type='int', help='Delete files older then this DAYS number of days', metavar='DAYS')
   parser.add_option("-T", "--trash-path", dest='trash_path', help='Set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
   parser.add_option("--verbose", action='store_true', dest='verbose', help='Be more verbose, a must when testing something out')
   parser.add_option("--check", action='store_true', dest='check', help='Report .trashinfo files without a real file')
@@ -70,16 +78,15 @@ def main(args):
   if options.version:
     print '''Version 0.0.2 \nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\n License GPLv3+'''
   
-  options.days = int(options.days)
   if options.days <= 0:
-    print 'Can not work with negative or zero days'
-    return 0
-  trash_info_path = os.path.expanduser(options.trash_path + '/info')
-  if not os.path.exists(trash_info_path):
-    print 'Cannot find trash information directory. Make sure you have at least GNOME 2.24'
-    print 'Should be at:', trash_info_path
+    parser.error('Can not work with negative or zero days')
     return 1
-  for file_name in glob.iglob('%s/*.trashinfo' % trash_info_path):
+  trash_info_path = os.path.expanduser(os.path.join(options.trash_path,'info'))
+  if not os.path.exists(trash_info_path):
+    print 'Can not find trash information directory. Make sure you have at least GNOME 2.24'
+    print 'I was looking at:', trash_info_path
+    return 1
+  for file_name in glob.iglob(os.path.join(trash_info_path, '*.trashinfo')):
     if options.check:
       if not os.path.exists(trash_file_name(file_name)):
         print file_name,'has no real file associated with it.'
@@ -95,7 +102,7 @@ def main(args):
       print '  is',days_old,'days old (',seconds_old,' seconds)'
       print '  deletion date was', time.strftime('%c', file_time)
     if days_old > options.days:
-      purge(file_name, options.dryrun)
+      purge(options.trash_path, file_name, options.dryrun)
       if options.dryrun:
         print '  because it describes a',days_old,'days old file'
   return 0
