@@ -21,33 +21,38 @@ import optparse
 import ConfigParser
 import shutil
 import glob
-import os.path
+import os
 import time
 import math
+import logging
 
-def trash_file_name(trash_name):
-  '''Get data file name from trashinfo file name: basename without extension'''
+# custom logging level between DEBUG and INFO
+VERBOSE = 15
+
+def real_file_name(trash_name):
+  '''Get real file name from trashinfo file name: basename without extension in ../files'''
   basename = os.path.basename(trash_name)
-  (data_name, ext) = os.path.splitext(basename)
-  return data_name
+  trash_directory = os.path.abspath(os.path.join(os.path.dirname(trash_name), '..'))
+  (file_name, trashinfo_ext) = os.path.splitext(basename)
+  return os.path.join(trash_directory, 'files', file_name)
 
 def purge(trash_directory, trash_name, dryrun):
   '''Purge the file behind the trash file fname'''
-  file_name = trash_file_name(trash_name)
-  target = os.path.join(trash_directory, 'files', file_name)
+  target = real_file_name(trash_name)
   if dryrun:
     if os.path.exists(target):
-      print ' Remove ', target
+      logging.info(' Remove  %s', target)
     else:
-      print '[Remove]', target
+      logging.info('[Remove] %s', target)
     if os.path.exists(trash_name):
-      print ' Remove ', trash_name
+      logging.info(' Remove  %s', trash_name)
     else:
-      print '[Remove]', trash_name
+      logging.info('[Remove] %s', trash_name)
     return False
+  #The real deleting...
   if os.path.exists(target):
     if os.path.isdir(target) and not os.path.islink(target):
-        shutil.rmtree(target)
+      shutil.rmtree(target)
     else:
       os.unlink(target)
   os.unlink(trash_name)
@@ -66,7 +71,13 @@ def trash_info_date(fname):
 def main(args):
   #Load and set configuration options
   parser = optparse.OptionParser(usage='%prog')
-  parser.set_defaults(days=30, dryrun=False, verbose=False,trash_path=os.path.join('~','.local','share','Trash'), check=False)
+  parser.set_defaults(
+      days=30,
+      trash_path=os.path.join('~','.local','share','Trash'),
+      verbose=False,
+      check=False,
+      dryrun=False,
+      )
   parser.add_option('-d', '--days', dest='days', type='int', help='Delete files older then DAYS number of days. Default: %i' % parser.defaults['days'], metavar='DAYS')
   parser.add_option('-T', '--trash-path', dest='trash_path', help='Set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
   parser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='Be more verbose, a must when testing something out')
@@ -82,31 +93,34 @@ def main(args):
   if options.days <= 0:
     parser.error('Can not work with negative or zero days')
     return 1
+
+  logging.basicConfig(level=logging.INFO, format='%(message)s')
+  logging.addLevelName(VERBOSE, 'VERBOSE')
+  if options.verbose:
+    logging.getLogger().setLevel(VERBOSE)
   
   trash_info_path = os.path.expanduser(os.path.join(options.trash_path,'info'))
   if not os.path.exists(trash_info_path):
-    print 'Can not find trash information directory. Make sure you have at least GNOME 2.24'
-    print 'I was looking at:', trash_info_path
+    logging.error('Can not find trash information directory. Make sure you have at least GNOME 2.24')
+    logging.error('I was looking at: %s', trash_info_path)
     return 1
   for file_name in glob.iglob(os.path.join(trash_info_path, '*.trashinfo')):
     if options.check:
-      if not os.path.exists(trash_file_name(file_name)):
-        print file_name,'has no real file associated with it.'
-    #print 'Loading file',file_name
+      if not os.path.exists(real_file_name(file_name)):
+        logging.warning('%s has no real file associated with it.', file_name)
     file_time = trash_info_date(file_name)
     if file_time == None:
       continue
     #Calculate seconds from now
     seconds_old = time.time() - time.mktime(file_time)
     days_old = int(math.floor(seconds_old/(3600.0*24.0)))
-    if options.verbose:
-      print 'File',file_name
-      print '  is',days_old,'days old (',seconds_old,' seconds)'
-      print '  deletion date was', time.strftime('%c', file_time)
+    logging.log(VERBOSE, 'File %s', file_name)
+    logging.log(VERBOSE, '  is %d days old, %d seconds', days_old, seconds_old)
+    logging.log(VERBOSE, '  deletion date was %s', time.strftime('%c', file_time))
     if days_old > options.days:
       purge(options.trash_path, file_name, options.dryrun)
       if options.dryrun:
-        print '  because it describes a',days_old,'days old file'
+        logging.info('  because it describes a %d days old file', days_old)
   return 0
 
 if __name__ == '__main__':
