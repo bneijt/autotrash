@@ -76,7 +76,7 @@ def main(args):
   (options, args) = parser.parse_args()
   
   if options.version:
-    print '''Version 0.0.3 \nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\n License GPLv3+'''
+    print '''Version 0.0.4 \nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\n License GPLv3+'''
   
   if options.days <= 0:
     parser.error('Can not work with negative or zero days')
