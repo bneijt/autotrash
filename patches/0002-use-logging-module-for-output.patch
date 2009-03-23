@@ -1,0 +1,90 @@
+>From 7f1e2a63da0432410f300a5e90299c1b4b3c2c6d Mon Sep 17 00:00:00 2001
+From: Nathaniel W. Turner <nate@houseofnate.net>
+Date: Sat, 21 Mar 2009 20:13:48 -0400
+Subject: [PATCH] use logging module for output
+
+This will facilitate finer-grained output control going forward.
+---
+ autotrash |   33 +++++++++++++++++++++------------
+ 1 files changed, 21 insertions(+), 12 deletions(-)
+
+diff --git a/autotrash b/autotrash
+index cbe33fe..b4e4487 100755
+--- a/autotrash
++++ b/autotrash
+@@ -24,6 +24,10 @@ import glob
+ import os.path
+ import time
+ import math
++import logging
++
++# custom logging level between DEBUG and INFO
++VERBOSE = 15
+ 
+ def real_file_path(trash_name):
+   '''Get data file path from trashinfo file path'''
+@@ -37,13 +41,13 @@ def purge(trash_directory, trash_name, dryrun):
+   target = real_file_path(trash_name)
+   if dryrun:
+     if os.path.exists(target):
+-      print ' Remove ', target
++      logging.info(' Remove  %s', target)
+     else:
+-      print '[Remove]', target
++      logging.info('[Remove] %s', target)
+     if os.path.exists(trash_name):
+-      print ' Remove ', trash_name
++      logging.info(' Remove  %s', trash_name)
+     else:
+-      print '[Remove]', trash_name
++      logging.info('[Remove] %s', trash_name)
+     return False
+   if os.path.exists(target):
+     if os.path.isdir(target):
+@@ -81,15 +85,21 @@ def main(args):
+   if options.days <= 0:
+     parser.error('Can not work with negative or zero days')
+     return 1
++
++  logging.basicConfig(level=logging.INFO, format='%(message)s')
++  logging.addLevelName(VERBOSE, 'VERBOSE')
++  if options.verbose:
++    logging.getLogger().setLevel(VERBOSE)
++
+   trash_info_path = os.path.expanduser(os.path.join(options.trash_path,'info'))
+   if not os.path.exists(trash_info_path):
+-    print 'Can not find trash information directory. Make sure you have at least GNOME 2.24'
+-    print 'I was looking at:', trash_info_path
++    logging.error('Can not find trash information directory. Make sure you have at least GNOME 2.24')
++    logging.error('I was looking at: %s', trash_info_path)
+     return 1
+   for file_name in glob.iglob(os.path.join(trash_info_path, '*.trashinfo')):
+     if options.check:
+       if not os.path.exists(real_file_path(file_name)):
+-        print file_name,'has no real file associated with it.'
++        logging.warning('%s has no real file associated with it.', file_name)
+     #print 'Loading file',file_name
+     file_time = trash_info_date(file_name)
+     if file_time == None:
+@@ -97,14 +107,13 @@ def main(args):
+     #Calculate seconds from now
+     seconds_old = time.time() - time.mktime(file_time)
+     days_old = int(math.floor(seconds_old/(3600.0*24.0)))
+-    if options.verbose:
+-      print 'File',file_name
+-      print '  is',days_old,'days old (',seconds_old,' seconds)'
+-      print '  deletion date was', time.strftime('%c', file_time)
++    logging.log(VERBOSE, 'File %s', file_name)
++    logging.log(VERBOSE, '  is %d days old, %d seconds', days_old, seconds_old)
++    logging.log(VERBOSE, '  deletion date was %s', time.strftime('%c', file_time))
+     if days_old > options.days:
+       purge(options.trash_path, file_name, options.dryrun)
+       if options.dryrun:
+-        print '  because it describes a',days_old,'days old file'
++        logging.info('  because it describes a %d days old file', days_old)
+   return 0
+ 
+ if __name__ == '__main__':
+-- 
+1.5.6.3
+

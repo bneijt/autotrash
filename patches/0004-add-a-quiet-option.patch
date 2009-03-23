@@ -1,0 +1,37 @@
+>From 1a74101a1110c7cee801b9e3c546f8fb36e16f13 Mon Sep 17 00:00:00 2001
+From: Nathaniel W. Turner <nate@houseofnate.net>
+Date: Sat, 21 Mar 2009 20:18:44 -0400
+Subject: [PATCH] add a --quiet option
+
+If --quiet is specified, output is only generated if something goes
+wrong.  This is useful when running from a cron job if the user does not
+want an email every time some files are aged out, but does want to be
+notified if something went wrong with the script.
+---
+ autotrash |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/autotrash b/autotrash
+index 48db95f..88759c9 100755
+--- a/autotrash
++++ b/autotrash
+@@ -74,6 +74,7 @@ def main(args):
+   parser.add_option('-d', '--days', dest='days', type='int', help='Delete files older then DAYS number of days. Default: %i' % parser.defaults['days'], metavar='DAYS')
+   parser.add_option('-T', '--trash-path', dest='trash_path', help='Set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
+   parser.add_option('--verbose', action='store_true', dest='verbose', help='Be more verbose, a must when testing something out')
++  parser.add_option('-q', '--quiet', action='store_true', dest='quiet', help='Only generate output if something is wrong')
+   parser.add_option('--check', action='store_true', dest='check', help='Report .trashinfo files without a real file')
+   parser.add_option('--dry-run', action='store_true', dest='dryrun', help='Just list what would have been done')
+   parser.add_option('-v', '--version', action='store_true', dest='version', help='Show version and exit')
+@@ -91,6 +92,8 @@ def main(args):
+   logging.addLevelName(VERBOSE, 'VERBOSE')
+   if options.verbose:
+     logging.getLogger().setLevel(VERBOSE)
++  elif options.quiet:
++    logging.getLogger().setLevel(logging.WARNING)
+ 
+   trash_info_path = os.path.expanduser(os.path.join(options.trash_path,'info'))
+   if not os.path.exists(trash_info_path):
+-- 
+1.5.6.3
+
