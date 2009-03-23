@@ -74,15 +74,17 @@ def main(args):
   #Load and set configuration options
   parser = optparse.OptionParser(usage='%prog')
   parser.set_defaults(
-      days=30,
-      trash_path=os.path.join('~','.local','share','Trash'),
-      verbose=False,
-      check=False,
-      dryrun=False,
+      days = 30,
+      trash_path = os.path.join('~','.local','share','Trash'),
+      verbose = False,
+      quiet = False,
+      check = False,
+      dryrun = False,
       )
   parser.add_option('-d', '--days', dest='days', type='int', help='Delete files older then DAYS number of days. Default: %i' % parser.defaults['days'], metavar='DAYS')
   parser.add_option('-T', '--trash-path', dest='trash_path', help='Set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
   parser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='Be more verbose, a must when testing something out')
+  parser.add_option('-q', '--quiet', action='store_true', dest='quiet', help='Only output warnings (is overruled by verbose)')
   parser.add_option('--check', action='store_true', dest='check', help='Report .trashinfo files without a real file')
   parser.add_option('--dry-run', action='store_true', dest='dryrun', help='Just list what would have been done')
   parser.add_option('-V', '--version', action='store_true', dest='version', help='Show version and exit')
@@ -100,6 +102,8 @@ def main(args):
   logging.addLevelName(VERBOSE, 'VERBOSE')
   if options.verbose:
     logging.getLogger().setLevel(VERBOSE)
+  elif options.quiet:
+    logging.getLogger().setLevel(WARNING)
   
   trash_info_path = os.path.expanduser(os.path.join(options.trash_path,'info'))
   if not os.path.exists(trash_info_path):
