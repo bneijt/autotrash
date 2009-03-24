@@ -103,7 +103,7 @@ def main(args):
   if options.verbose:
     logging.getLogger().setLevel(VERBOSE)
   elif options.quiet:
-    logging.getLogger().setLevel(WARNING)
+    logging.getLogger().setLevel(logging.WARNING)
   
   trash_info_path = os.path.expanduser(os.path.join(options.trash_path,'info'))
   if not os.path.exists(trash_info_path):
