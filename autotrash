@@ -86,9 +86,10 @@ def get_consumed_size(path):
   return size
 
 def fmt_bytes(bytes, fmt='%.1f'):
-  for pow, name in  (40, 'TiB'), (30, 'GiB'), (20, 'MiB'), (10, 'KiB'):
-    if bytes >= 2**pow:
-      return '%s %s' % (fmt % (1. * bytes / 2**pow,), name)
+  #If you NEED EiB, ZiB or YiB, please send me a mail I woul love to hear from you.
+  for size, name in  (1<<50L, 'PiB'), (1<<40L, 'TiB'), (1<<30L, 'GiB'), (1<<20L, 'MiB'), (1<<10L, 'KiB'):
+    if bytes >= size:
+      return '%s %s' % (fmt % (float(bytes) / size), name)
   return '%d bytes' % bytes
 
 def main(args):
@@ -100,16 +101,17 @@ def main(args):
       verbose = False,
       quiet = False,
       check = False,
-      stat = False,
       dryrun = False,
+      stat = False,
+      version = False,
       )
   parser.add_option('-d', '--days', dest='days', type='int', help='Delete files older then DAYS number of days. Default: %i' % parser.defaults['days'], metavar='DAYS')
   parser.add_option('-T', '--trash-path', dest='trash_path', help='Set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
   parser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='Be more verbose, a must when testing something out')
-  parser.add_option('-q', '--quiet', action='store_true', dest='quiet', help='Only output warnings (is overruled by verbose)')
+  parser.add_option('-q', '--quiet', action='store_true', dest='quiet', help='Only output warnings')
   parser.add_option('--check', action='store_true', dest='check', help='Report .trashinfo files without a real file')
   parser.add_option('--dry-run', action='store_true', dest='dryrun', help='Just list what would have been done')
-  parser.add_option('--stat', action='store_true', dest='stat', help='Calculate the number and total size of files involved')
+  parser.add_option('--stat', action='store_true', dest='stat', help='Show the number, and total size of files involved')
   parser.add_option('-V', '--version', action='store_true', dest='version', help='Show version and exit')
   (options, args) = parser.parse_args()
   
@@ -121,7 +123,7 @@ def main(args):
     logging.getLogger().setLevel(logging.WARNING)
 
   if options.version:
-    logging.info('''Version 0.0.5SVN\nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\nLicense GPLv3+''')
+    logging.info('''Version 0.0.5\nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\nLicense GPLv3+''')
     return 1
   
   if options.days <= 0:

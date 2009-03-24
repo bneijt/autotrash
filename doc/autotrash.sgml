@@ -20,7 +20,7 @@ manpage.1: manpage.sgml
   <!ENTITY dhfirstname "<firstname>Bram</firstname>">
   <!ENTITY dhsurname   "<surname>Neijt</surname>">
   <!-- Please adjust the date whenever revising the manpage. -->
-  <!ENTITY dhdate      "<date>January 31, 2009</date>">
+  <!ENTITY dhdate      "<date>March 24, 2009</date>">
   <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
        allowed: see man(7), man(1). -->
   <!ENTITY dhsection   "<manvolnum>1</manvolnum>">
@@ -69,16 +69,8 @@ manpage.1: manpage.sgml
   <refsect1>
     <title>DESCRIPTION</title>
 
-    <para>This manual page documents briefly the
-      <command>&dhpackage;</command> and <command>bar</command>
-      commands.</para>
-
-    <para>This manual page was written for the &debian; distribution
-      because the original program does not have a manual page.
-      Instead, it has documentation in the &gnu;
-      <application>Info</application> format; see below.</para>
-
-    <para><command>&dhpackage;</command> is a program that...</para>
+    <para><command>&dhpackage;</command> is a program that reads the FreeDesktop.org Trash specification, trash information to determine which files are older then a given number of days (defaults to 30). If not run with the <option>--dry-run</option>, it will purge files which have been moved to the trash more then the given number of days ago.</para>
+    <para>Running this command without any argument may remove files from your computer.</para>
 
   </refsect1>
   <refsect1>
@@ -88,34 +80,38 @@ manpage.1: manpage.sgml
       with long options starting with two dashes (`-').</para>
     <variablelist>
       <varlistentry>
-        <term><option>-h</option>
-          <option>--help</option>
+        <term><option>-h</option>, <option>--help</option>
         </term>
         <listitem>
           <para>Show summary of options.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>-d <replaceable>DAYS</replaceable></option>
-          <option>--days <replaceable>DAYS</replaceable></option>
+        <term><option>-d <replaceable>DAYS</replaceable></option>, <option>--days <replaceable>DAYS</replaceable></option>
         </term>
         <listitem>
           <para>Delete files older then DAYS number of days. Default: 30</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>-T <replaceable>PATH</replaceable></option>
-          <option>--trash-path <replaceable>PATH</replaceable></option>
+        <term><option>-T <replaceable>PATH</replaceable></option>, <option>--trash-path <replaceable>PATH</replaceable></option>
         </term>
         <listitem>
           <para>Use the given path as the location of the Trash directory, instead of the default: ~/.local/share/Trash .</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--verbose</option>
+        <term><option>-v</option>, <option>--verbose</option>
         </term>
         <listitem>
           <para>Output information on what is happening and why.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-q</option>, <option>--quiet</option>
+        </term>
+        <listitem>
+          <para>Only output warnings.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -133,8 +129,14 @@ manpage.1: manpage.sgml
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>-v</option>
-          <option>--version</option>
+        <term><option>--stat</option>
+        </term>
+        <listitem>
+          <para>Show the number, and total size of files involved.</para>
+        </listitem>
+      </varlistentry>      
+      <varlistentry>
+        <term><option>-V</option>, <option>--version</option>
         </term>
         <listitem>
           <para>Show version of program.</para>
