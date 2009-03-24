@@ -1,4 +1,6 @@
 - Add an option to have it register itself with crontab (an install yourself option).
+- Move code to a separate python file and use a shellscript to wrap it so the code
+  can be distributed in bytecode.
 
 Long term / per request:
 - Move to python XDG as soon as it supports Trash information files
