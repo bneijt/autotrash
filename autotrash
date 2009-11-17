@@ -98,6 +98,7 @@ def main(args):
   parser.set_defaults(
       days = 30,
       trash_path = os.path.join('~','.local','share','Trash'),
+      max_free = 0,
       verbose = False,
       quiet = False,
       check = False,
@@ -107,6 +108,9 @@ def main(args):
       )
   parser.add_option('-d', '--days', dest='days', type='int', help='Delete files older then DAYS number of days. Default: %i' % parser.defaults['days'], metavar='DAYS')
   parser.add_option('-T', '--trash-path', dest='trash_path', help='Set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
+  parser.add_option('--max-free', dest='max_free', type='int', help='Only run if less then M megabytes of free space is left. Default: %s' % parser.defaults['max_free'], metavar='M')
+  #min-free is now reserved for the future and will allow you to start deleting if only a given amount of space is left on the main device
+  #free will be a companion of min-free to set the number of megabytes to free (delete at least that many bytes from oldest to newest)
   parser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='Be more verbose, a must when testing something out')
   parser.add_option('-q', '--quiet', action='store_true', dest='quiet', help='Only output warnings')
   parser.add_option('--check', action='store_true', dest='check', help='Report .trashinfo files without a real file')
@@ -129,6 +133,9 @@ def main(args):
   if options.days <= 0:
     parser.error('Can not work with negative or zero days')
 
+  if options.max_free < 0:
+    parser.error('Can not work with negative value for --max-free')
+
   if options.stat and options.quiet:
     parser.error('Specifying both --quiet and --stat does not make sense')
 
@@ -142,6 +149,18 @@ def main(args):
     logging.error('I was looking at: %s', trash_info_path)
     return 1
   
+  if options.max_free:
+    #Check if there is less then max_free megabytes of free space
+    #if there is not less, then do nothing and skip the glob.
+    fs_stat = os.statvfs(trash_info_path)
+    if fs_stat.f_bsize <= 0:
+      logging.error('Can not determine free space because the returned filesystem block size was %i\n  The --max-free option may not be supported for this filesystem.' % fs_stat.f_bsize)
+      return 1
+    free_megabytes = int((fs_stat.f_bavail * fs_stat.f_bsize) / (1024*1024))
+    if free_megabytes > options.max_free:
+      logging.log(VERBOSE, 'I see %i MB of free space at "%s"\n  which is more then --max-free, doing nothing.', free_megabytes, trash_info_path)
+      return 0
+    
   total_size = 0
   total_files = 0
   deleted_size = 0
