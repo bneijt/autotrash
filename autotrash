@@ -38,6 +38,7 @@ def real_file_name(trash_name):
 
 def purge(trash_directory, trash_name, dryrun):
   '''Purge the file behind the trash file fname'''
+  assert os.path.exists(trash_name)
   target = real_file_name(trash_name)
   if dryrun:
     if os.path.exists(target):
@@ -201,42 +202,43 @@ def main(args):
     
   #Collect file info's
   files = []
-  for file_name in glob.iglob(os.path.join(trash_info_path, '*.trashinfo')):
-    real_file = real_file_name(file_name)
-    file_info = {
-      'trash_info': file_name,
-      'real_file': real_file
-      }
-    if options.check:
-      if not os.path.exists(real_file):
-        logging.warning('%s has no real file associated with it', file_name)
+  if True: #Scope protection
+    for file_name in glob.iglob(os.path.join(trash_info_path, '*.trashinfo')):
+      real_file = real_file_name(file_name)
+      file_info = {
+        'trash_info': file_name,
+        'real_file': real_file
+        }
+      if options.check:
+        if not os.path.exists(real_file):
+          logging.warning('%s has no real file associated with it', file_name)
 
-    file_time = trash_info_date(file_name)
-    if not file_time:
-      continue #This should actually never happen really
-    file_info['time'] = time.mktime(file_time)
-    file_info['age_seconds'] = time.time() - file_info['time']
-    file_info['age_days'] = int(math.floor(file_info['age_seconds']/(3600.0 * 24.0)))
+      file_time = trash_info_date(file_name)
+      if not file_time:
+        continue #This should actually never happen really
+      file_info['time'] = time.mktime(file_time)
+      file_info['age_seconds'] = time.time() - file_info['time']
+      file_info['age_days'] = int(math.floor(file_info['age_seconds']/(3600.0 * 24.0)))
 
-    if options.stat or options.delete:
-      # calculating file size is relatively expensive; only do it if needed
-      file_size = get_consumed_size(file_name)
-      if os.path.exists(real_file):
-        if os.path.isdir(real_file):
-          logging.log(VERBOSE, 'Calculating size of directory %s (may take a long time)', real_file)
-        file_size += get_consumed_size(real_file)
-      file_info['size'] = file_size
+      if options.stat or options.delete:
+        # calculating file size is relatively expensive; only do it if needed
+        file_size = get_consumed_size(file_name)
+        if os.path.exists(real_file):
+          if os.path.isdir(real_file):
+            logging.log(VERBOSE, 'Calculating size of directory %s (may take a long time)', real_file)
+          file_size += get_consumed_size(real_file)
+        file_info['size'] = file_size
 
-    logging.log(VERBOSE, 'File %s', file_name)
-    logging.log(VERBOSE, '  is %d days old, %d seconds, so it should %sbe removed',
-        file_info['age_days'],
-        file_info['age_seconds'],
-        ['not ',''][int(file_info['age_days'] > options.days)])
-    logging.log(VERBOSE, '  deletion date was %s', time.strftime('%c', file_time))
-    if options.stat:
-      logging.log(VERBOSE, '  consumes %s', fmt_bytes(file_info['size']))
+      logging.log(VERBOSE, 'File %s', file_name)
+      logging.log(VERBOSE, '  is %d days old, %d seconds, so it should %sbe removed',
+          file_info['age_days'],
+          file_info['age_seconds'],
+          ['not ',''][int(file_info['age_days'] > options.days)])
+      logging.log(VERBOSE, '  deletion date was %s', time.strftime('%c', file_time))
+      if options.stat:
+        logging.log(VERBOSE, '  consumes %s', fmt_bytes(file_info['size']))
 
-    files.append(file_info)
+      files.append(file_info)
   
   #Kill sorting: first will get purged first if --delete is enabled
   def oldest_first_cmp(a,b):
@@ -246,14 +248,15 @@ def main(args):
   total_size = 0
   deleted_size = 0
   deleted_files = 0
-  for file_info in files:
-    if options.stat:
-      total_size += file_info['size']
+  if True:
+    for file_info in files:
+      if options.stat:
+        total_size += file_info['size']
 
-    if file_info['age_days'] > options.days or deleted_size < deleted_target:
-      purge(options.trash_path, file_name, options.dryrun)
-      deleted_size += file_info['size']
-      deleted_files += 1
+      if (options.days and file_info['age_days'] > options.days) or deleted_size < deleted_target:
+        purge(options.trash_path, file_info['trash_info'], options.dryrun)
+        deleted_size += file_info['size']
+        deleted_files += 1
   
   if options.stat:
     logging.info('Trash statistics:')
