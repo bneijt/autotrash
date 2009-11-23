@@ -41,13 +41,13 @@ def purge(trash_directory, trash_name, dryrun):
   target = real_file_name(trash_name)
   if dryrun:
     if os.path.exists(target):
-      logging.info(' Remove  %s', target)
+      logging.info('Remove %s', target)
     else:
-      logging.info('[Remove] %s', target)
+      logging.info('Ignore %s', target)
     if os.path.exists(trash_name):
-      logging.info(' Remove  %s', trash_name)
+      logging.info('Remove %s', trash_name)
     else:
-      logging.info('[Remove] %s', trash_name)
+      logging.info('Ignore %s', trash_name)
     return False
   #The real deleting...
   if os.path.exists(target):
@@ -99,6 +99,7 @@ def main(args):
       days = 30,
       trash_path = os.path.join('~','.local','share','Trash'),
       max_free = 0,
+      delete = 0,
       verbose = False,
       quiet = False,
       check = False,
@@ -109,6 +110,7 @@ def main(args):
   parser.add_option('-d', '--days', dest='days', type='int', help='Delete files older then DAYS number of days. Default: %i' % parser.defaults['days'], metavar='DAYS')
   parser.add_option('-T', '--trash-path', dest='trash_path', help='Set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
   parser.add_option('--max-free', dest='max_free', type='int', help='Only run if less then M megabytes of free space is left. Default: %s' % parser.defaults['max_free'], metavar='M')
+  parser.add_option('--delete', dest='delete', type='int', help='Delete at least M megabytes. Default: %s' % parser.defaults['delete'], metavar='M')
   #min-free is now reserved for the future and will allow you to start deleting if only a given amount of space is left on the main device
   #free will be a companion of min-free to set the number of megabytes to free (delete at least that many bytes from oldest to newest)
   parser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='Be more verbose, a must when testing something out')
@@ -127,7 +129,7 @@ def main(args):
     logging.getLogger().setLevel(logging.WARNING)
 
   if options.version:
-    logging.info('''Version 0.0.6\nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\nLicense GPLv3+''')
+    logging.info('''Version 0.0.7dev\nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\nLicense GPLv3+''')
     return 1
   
   if options.days <= 0:
@@ -160,46 +162,72 @@ def main(args):
     if free_megabytes > options.max_free:
       logging.log(VERBOSE, 'I see %i MB of free space at "%s"\n  which is more then --max-free, doing nothing.', free_megabytes, trash_info_path)
       return 0
+  
+  deleted_target = 0
+  if options.delete:
+    deleted_target = options.delete * 1024 * 1024
     
-  total_size = 0
-  total_files = 0
-  deleted_size = 0
-  deleted_files = 0
+  #Collect file info's
+  files = []
   for file_name in glob.iglob(os.path.join(trash_info_path, '*.trashinfo')):
-    file_size = 0
     real_file = real_file_name(file_name)
+    file_info = {
+      'trash_info': file_name,
+      'real_file': real_file
+      }
     if options.check:
       if not os.path.exists(real_file):
         logging.warning('%s has no real file associated with it', file_name)
-    if options.stat:
+
+    file_time = trash_info_date(file_name)
+    if not file_time:
+      continue #This should actually never happen really
+    file_info['time'] = time.mktime(file_time)
+    file_info['age_seconds'] = time.time() - file_info['time']
+    file_info['age_days'] = int(math.floor(file_info['age_seconds']/(3600.0*24.0)))
+
+    if options.stat or options.delete:
       # calculating file size is relatively expensive; only do it if needed
-      file_size += get_consumed_size(file_name)
+      file_size = get_consumed_size(file_name)
       if os.path.exists(real_file):
         if os.path.isdir(real_file):
-          logging.log(VERBOSE, 'Calculating size of directory %s (might take a long time)', real_file)
+          logging.log(VERBOSE, 'Calculating size of directory %s (may take a long time)', real_file)
         file_size += get_consumed_size(real_file)
-    total_size += file_size
-    total_files += 1
-    file_time = trash_info_date(file_name)
-    if file_time == None:
-      continue
-    #Calculate seconds from now
-    seconds_old = time.time() - time.mktime(file_time)
-    days_old = int(math.floor(seconds_old/(3600.0*24.0)))
+      file_info['size'] = file_size
+
     logging.log(VERBOSE, 'File %s', file_name)
-    logging.log(VERBOSE, '  is %d days old, %d seconds, so it should %sbe removed', days_old, seconds_old, ['not ',''][int(days_old > options.days)])
+    logging.log(VERBOSE, '  is %d days old, %d seconds, so it should %sbe removed',
+        file_info['age_days'],
+        file_info['age_seconds'],
+        ['not ',''][int(file_info['age_days'] > options.days)])
     logging.log(VERBOSE, '  deletion date was %s', time.strftime('%c', file_time))
     if options.stat:
-      logging.log(VERBOSE, '  consumes %s', fmt_bytes(file_size))
-    if days_old > options.days:
+      logging.log(VERBOSE, '  consumes %s', fmt_bytes(file_info['size']))
+
+    files.append(file_info)
+  
+  #Kill sorting: first will get purged first if --delete is enabled
+  def oldest_first_cmp(a,b):
+    return int(a['time'] - b['time'])
+  files.sort(cmp = oldest_first_cmp)
+
+  total_size = 0
+  deleted_size = 0
+  deleted_files = 0
+  for file_info in files:
+    if options.stat:
+      total_size += file_info['size']
+
+    if file_info['age_days'] > options.days or deleted_size < deleted_target:
       purge(options.trash_path, file_name, options.dryrun)
-      deleted_size += file_size
+      deleted_size += file_info['size']
       deleted_files += 1
+  
   if options.stat:
     logging.info('Trash statistics:')
-    logging.info('  %6d entries at start (%s)', total_files, fmt_bytes(total_size))
+    logging.info('  %6d entries at start (%s)', len(files), fmt_bytes(total_size))
     logging.info(' -%6d deleted (%s)', deleted_files, fmt_bytes(deleted_size))
-    logging.info(' =%6d remaining (%s)', (total_files - deleted_files), fmt_bytes(total_size - deleted_size))
+    logging.info(' =%6d remaining (%s)', (len(files) - deleted_files), fmt_bytes(total_size - deleted_size))
   return 0
 
 if __name__ == '__main__':
