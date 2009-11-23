@@ -57,7 +57,7 @@ manpage.1: manpage.sgml
   <refnamediv>
     <refname>&dhpackage;</refname>
 
-    <refpurpose>program to automatically purge 30 day old files from the FreeDesktop.org trash</refpurpose>
+    <refpurpose>program to automatically purge old files from the FreeDesktop.org trash</refpurpose>
   </refnamediv>
   <refsynopsisdiv>
     <cmdsynopsis>
@@ -112,6 +112,13 @@ manpage.1: manpage.sgml
         </term>
         <listitem>
           <para>Delete at least <replaceable>N</replaceable> megabytes, deleting oldest trash addition first. It uses trash entries, NOT individual files. This means that if your oldest trashed item is a 1GB directory, and you request at least 10MB to be removed (N=10), &dhpackage; will remove 1GB. If unsure, try running autotrash with <option>--dry-run</option> and <option>--stat</option> to see the effect.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--min-free <replaceable>N</replaceable></option>
+        </term>
+        <listitem>
+          <para>Make sure there is a minimum of <replaceable>N</replaceable> megabytes of free space. If there is less free space, set <option>--delete</option> to the difference between <replaceable>N</replaceable> and the amount of free space. If unsure, try running autotrash with <option>--dry-run</option> and <option>--verbose</option> to see the effect.</para>
         </listitem>
       </varlistentry>
       <varlistentry>

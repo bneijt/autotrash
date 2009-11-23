@@ -94,12 +94,13 @@ def fmt_bytes(bytes, fmt='%.1f'):
 
 def main(args):
   #Load and set configuration options
-  parser = optparse.OptionParser(usage='%prog')
+  parser = optparse.OptionParser(usage='%prog -d <days old to remove>')
   parser.set_defaults(
       days = 30,
       trash_path = os.path.join('~','.local','share','Trash'),
       max_free = 0,
       delete = 0,
+      min_free = 0,
       verbose = False,
       quiet = False,
       check = False,
@@ -111,8 +112,7 @@ def main(args):
   parser.add_option('-T', '--trash-path', dest='trash_path', help='Set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
   parser.add_option('--max-free', dest='max_free', type='int', help='Only run if less then M megabytes of free space is left. Default: %s' % parser.defaults['max_free'], metavar='M')
   parser.add_option('--delete', dest='delete', type='int', help='Delete at least M megabytes. Default: %s' % parser.defaults['delete'], metavar='M')
-  #min-free is now reserved for the future and will allow you to start deleting if only a given amount of space is left on the main device
-  #free will be a companion of min-free to set the number of megabytes to free (delete at least that many bytes from oldest to newest)
+  parser.add_option('--min-free', dest='min_free', type='int', help='Set --delete to make use M megabytes of space is available. Default: %s' % parser.defaults['min_free'], metavar='M')
   parser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='Be more verbose, a must when testing something out')
   parser.add_option('-q', '--quiet', action='store_true', dest='quiet', help='Only output warnings')
   parser.add_option('--check', action='store_true', dest='check', help='Report .trashinfo files without a real file')
@@ -133,17 +133,28 @@ def main(args):
     return 1
   
   if options.days <= 0:
-    parser.error('Can not work with negative or zero days')
+    parser.error('Can not work with a negative or zero days')
 
   if options.max_free < 0:
-    parser.error('Can not work with negative value for --max-free')
+    parser.error('Can not work with a negative value for --max-free')
+  
+  if options.delete < 0:
+    parser.error('Can not work with a negative value for --delete')
+  
+  if options.min_free < 0:
+    parser.error('Can not work with a negative value for --min-free')
 
   if options.stat and options.quiet:
     parser.error('Specifying both --quiet and --stat does not make sense')
 
   if options.verbose and options.quiet:
     parser.error('Specifying both --quiet and --verbose does not make sense')
-
+  
+  if options.delete and options.min_free:
+    parser.error('Combining --delete and --min-free results in unpredictable behaviour as --delete may or may not be ignored depending on the free space.')
+  
+  
+  
   
   trash_info_path = os.path.expanduser(os.path.join(options.trash_path,'info'))
   if not os.path.exists(trash_info_path):
@@ -151,17 +162,23 @@ def main(args):
     logging.error('I was looking at: %s', trash_info_path)
     return 1
   
-  if options.max_free:
-    #Check if there is less then max_free megabytes of free space
-    #if there is not less, then do nothing and skip the glob.
+  if options.max_free or options.min_free: #Free space calculation is needed
     fs_stat = os.statvfs(trash_info_path)
     if fs_stat.f_bsize <= 0:
       logging.error('Can not determine free space because the returned filesystem block size was %i\n  The --max-free option may not be supported for this filesystem.' % fs_stat.f_bsize)
       return 1
     free_megabytes = int((fs_stat.f_bavail * fs_stat.f_bsize) / (1024*1024))
-    if free_megabytes > options.max_free:
-      logging.log(VERBOSE, 'I see %i MB of free space at "%s"\n  which is more then --max-free, doing nothing.', free_megabytes, trash_info_path)
-      return 0
+
+    if options.max_free:
+      #Check if there is less then max_free megabytes of free space
+      #if there is not less, then do nothing and skip the glob.
+      if free_megabytes > options.max_free:
+        logging.log(VERBOSE, 'I see %i MB of free space at "%s"\n  which is more then --max-free, doing nothing.', free_megabytes, trash_info_path)
+        return 0
+    if options.min_free and free_megabytes < options.min_free:
+      options.delete = options.min_free - free_megabytes
+      logging.log(VERBOSE, 'Setting --delete to %i to make sure at least %i MB becomes free.\n\t Currently we have %i megabytes of free space.', options.delete, options.min_free, free_megabytes)
+  
   
   deleted_target = 0
   if options.delete:
@@ -184,7 +201,7 @@ def main(args):
       continue #This should actually never happen really
     file_info['time'] = time.mktime(file_time)
     file_info['age_seconds'] = time.time() - file_info['time']
-    file_info['age_days'] = int(math.floor(file_info['age_seconds']/(3600.0*24.0)))
+    file_info['age_days'] = int(math.floor(file_info['age_seconds']/(3600.0 * 24.0)))
 
     if options.stat or options.delete:
       # calculating file size is relatively expensive; only do it if needed
