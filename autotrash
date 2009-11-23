@@ -94,9 +94,9 @@ def fmt_bytes(bytes, fmt='%.1f'):
 
 def main(args):
   #Load and set configuration options
-  parser = optparse.OptionParser(usage='%prog -d <days old to remove>')
+  parser = optparse.OptionParser(usage='%prog -d <days of age to purge>')
   parser.set_defaults(
-      days = 30,
+      days = 0,
       trash_path = os.path.join('~','.local','share','Trash'),
       max_free = 0,
       delete = 0,
@@ -108,11 +108,11 @@ def main(args):
       stat = False,
       version = False,
       )
-  parser.add_option('-d', '--days', dest='days', type='int', help='Delete files older then DAYS number of days. Default: %i' % parser.defaults['days'], metavar='DAYS')
+  parser.add_option('-d', '--days', dest='days', type='int', help='Delete files older then DAYS number of days.', metavar='DAYS')
   parser.add_option('-T', '--trash-path', dest='trash_path', help='Set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
-  parser.add_option('--max-free', dest='max_free', type='int', help='Only run if less then M megabytes of free space is left. Default: %s' % parser.defaults['max_free'], metavar='M')
-  parser.add_option('--delete', dest='delete', type='int', help='Delete at least M megabytes. Default: %s' % parser.defaults['delete'], metavar='M')
-  parser.add_option('--min-free', dest='min_free', type='int', help='Set --delete to make use M megabytes of space is available. Default: %s' % parser.defaults['min_free'], metavar='M')
+  parser.add_option('--max-free', dest='max_free', type='int', help='Only run if less then M megabytes of free space is left.', metavar='M')
+  parser.add_option('--delete', dest='delete', type='int', help='Delete at least M megabytes.', metavar='M')
+  parser.add_option('--min-free', dest='min_free', type='int', help='Set --delete to make use M megabytes of space is available.', metavar='M')
   parser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='Be more verbose, a must when testing something out')
   parser.add_option('-q', '--quiet', action='store_true', dest='quiet', help='Only output warnings')
   parser.add_option('--check', action='store_true', dest='check', help='Report .trashinfo files without a real file')
@@ -132,6 +132,9 @@ def main(args):
     logging.info('''Version 0.0.7dev\nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\nLicense GPLv3+''')
     return 1
   
+  if options.delete + options.min_free + options.days == 0:
+    parser.error('You need to specify at least one of:\n\t -d <days of age to purge>,\n\t --delete <number of megabytes to purge>, or\n\t --min-free <number of megabytes to make free>\n for this command to have any effect.')
+
   if options.days <= 0:
     parser.error('Can not work with a negative or zero days')
 
@@ -152,10 +155,7 @@ def main(args):
   
   if options.delete and options.min_free:
     parser.error('Combining --delete and --min-free results in unpredictable behaviour as --delete may or may not be ignored depending on the free space.')
-  
-  
-  
-  
+    
   trash_info_path = os.path.expanduser(os.path.join(options.trash_path,'info'))
   if not os.path.exists(trash_info_path):
     logging.error('Can not find trash information directory. Make sure you have at least GNOME 2.24')

@@ -69,8 +69,13 @@ manpage.1: manpage.sgml
   <refsect1>
     <title>DESCRIPTION</title>
 
-    <para><command>&dhpackage;</command> is a program that reads the FreeDesktop.org Trash specification, trash information to determine which files are older then a given number of days (defaults to 30). If not run with the <option>--dry-run</option>, it will purge files which have been moved to the trash more then the given number of days ago.</para>
-    <para>Running this command without any argument may remove files from your computer.</para>
+    <para><command>&dhpackage;</command> is a program that looks in a FreeDesktop.org Trash folder for information on it's contents and then purges a part of the trash depending on the options.
+    <para>The most common option is <option>-d</option>, which will purge files that have been in the trash for more then a given number of days.</para>
+    <para>The option <option>--delete</option> will remove at least the given number of megabytes from the trash, removing the oldest trash first.</para>
+    <para>Using <option>--min-free</option> will make sure at least the given number of megabytes of free space is available, by automatically setting <option>--delete</option> to the right value. For example, to keep at least a 1GB of free space, removing files from the Trash if needed, use <command>&dhpackage;</command> <option>--min-free</option> 1024 .</para>
+    
+    
+     older then a given number of days.reads the FreeDesktop.org Trash specification, trash information to determine which files are older then a given number of days. If not run with the <option>--dry-run</option>, it will purge files which have been moved to the trash more then the given number of days ago.</para>
 
   </refsect1>
   <refsect1>
