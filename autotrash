@@ -92,6 +92,15 @@ def fmt_bytes(bytes, fmt='%.1f'):
       return '%s %s' % (fmt % (float(bytes) / size), name)
   return '%d bytes' % bytes
 
+#def toggle_cronjob(args, options):
+#  prefix = '0 * * * *  ' #Hourly
+#  command = args[0]      #Reconstruct command
+#  #Reconstruct arguments
+#  assert False #TODO
+#  flags = ["'%s'" % s for s in args[1:]]
+#  flags = flags.replace('')
+
+
 def main(args):
   #Load and set configuration options
   parser = optparse.OptionParser(usage='%prog -d <days of age to purge>')
@@ -119,6 +128,7 @@ def main(args):
   parser.add_option('--dry-run', action='store_true', dest='dryrun', help='Just list what would have been done')
   parser.add_option('--stat', action='store_true', dest='stat', help='Show the number, and total size of files involved')
   parser.add_option('-V', '--version', action='store_true', dest='version', help='Show version and exit')
+#  parser.add_option('--toggle-cronjob', action='store_true', dest='toggle_cronjob', help='Install/Remove the hourly cronjob')
   (options, args) = parser.parse_args()
   
   logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -135,7 +145,7 @@ def main(args):
   if options.delete + options.min_free + options.days == 0:
     parser.error('You need to specify at least one of:\n\t -d <days of age to purge>,\n\t --delete <number of megabytes to purge>, or\n\t --min-free <number of megabytes to make free>\n for this command to have any effect.')
 
-  if options.days <= 0:
+  if options.days < 0:
     parser.error('Can not work with a negative or zero days')
 
   if options.max_free < 0:
@@ -155,6 +165,11 @@ def main(args):
   
   if options.delete and options.min_free:
     parser.error('Combining --delete and --min-free results in unpredictable behaviour as --delete may or may not be ignored depending on the free space.')
+  
+#  if options.toggle_cronjob:
+#    toggle_cronjob(args, options)
+#    return 0
+  
     
   trash_info_path = os.path.expanduser(os.path.join(options.trash_path,'info'))
   if not os.path.exists(trash_info_path):

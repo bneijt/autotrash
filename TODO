@@ -1,17 +1,12 @@
 - Add an option to have it register itself with crontab (an install yourself option).
 - Move code to a separate python file and use a shellscript to wrap it
   so the code can be distributed in bytecode.
-- Size based trash requests (yeah, a weak reference type trash): trash
-  as much as is needed to make sure we have X amount of free disk space
-  Needs: statfs, fstatfs - get file system statistics
-- Trash overflow prediction: use trashsize vs. time to predict if we need
-  to trash  things now or not.
 - Trash based on priority: documents are more important then movies, 
   so trash movies first.
-- GTK+ interface with trash frequency graphs?
 - Write UnitTest to check conformance with the specifications
   here: http://www.ramendik.ru/docs/trashspec.html
 
 Long term / per request:
+- GTK+ interface with trash frequency graphs?
 - Move to python XDG as soon as it supports Trash information files
 - Add an interactive mode? Someone will have to request this per mail if this is really needed or even wanted.
