@@ -1,6 +1,3 @@
-- Add an option to have it register itself with crontab (an install yourself option).
-- Move code to a separate python file and use a shellscript to wrap it
-  so the code can be distributed in bytecode.
 - Trash based on priority: documents are more important then movies, 
   so trash movies first.
 - Write UnitTest to check conformance with the specifications
@@ -9,4 +6,4 @@
 Long term / per request:
 - GTK+ interface with trash frequency graphs?
 - Move to python XDG as soon as it supports Trash information files
-- Add an interactive mode? Someone will have to request this per mail if this is really needed or even wanted.
+- Add an option to have it register itself with crontab (an install yourself option).

@@ -20,7 +20,7 @@ manpage.1: manpage.sgml
   <!ENTITY dhfirstname "<firstname>Bram</firstname>">
   <!ENTITY dhsurname   "<surname>Neijt</surname>">
   <!-- Please adjust the date whenever revising the manpage. -->
-  <!ENTITY dhdate      "<date>November 23, 2009</date>">
+  <!ENTITY dhdate      "<date>December 1, 2009</date>">
   <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
        allowed: see man(7), man(1). -->
   <!ENTITY dhsection   "<manvolnum>1</manvolnum>">
@@ -166,6 +166,37 @@ manpage.1: manpage.sgml
         </listitem>
       </varlistentry>
     </variablelist>
+  </refsect1>
+  <refsect1>
+    <title>EXAMPLES</title>
+
+    <para>Examples of program use.</para>
+    <variablelist>
+      <varlistentry>
+        <term>&dhpackage; -d 30</term>
+        <listitem>
+          <para>Purge any file that has been in the trash for more then 30 days</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>&dhpackage; --max-free 1024 -d 30</term>
+        <listitem>
+          <para>Only purge files from the trash if there is less then 1GB of space left on the trash filesystem.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>&dhpackage; --min-free 2048</term>
+        <listitem>
+          <para>Purge files from trash, oldest first, till there is at least 2GB of space on the trash filesystem. There is no restriction on how old trashed files can get.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>&dhpackage; --max-free 4000 --min-free 2048 -d 30</term>
+        <listitem>
+          <para>Start reading the trash if there is less then 4000MB of free space, then start keeping an eye on. At that point, remove files older then 30 days and if there is less then 2GB of free space after that remove even newer files.</para>
+        </listitem>
+      </varlistentry>
+ 		</variablelist>
   </refsect1>
 <!--
   <refsect1>
