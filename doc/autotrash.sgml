@@ -20,7 +20,7 @@ manpage.1: manpage.sgml
   <!ENTITY dhfirstname "<firstname>Bram</firstname>">
   <!ENTITY dhsurname   "<surname>Neijt</surname>">
   <!-- Please adjust the date whenever revising the manpage. -->
-  <!ENTITY dhdate      "<date>December 1, 2009</date>">
+  <!ENTITY dhdate      "<date>December 28, 2009</date>">
   <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
        allowed: see man(7), man(1). -->
   <!ENTITY dhsection   "<manvolnum>1</manvolnum>">
@@ -82,21 +82,21 @@ manpage.1: manpage.sgml
       with long options starting with two dashes (`-').</para>
     <variablelist>
       <varlistentry>
-        <term><option>-h</option>, <option>--help</option>
+        <term><option>-h</option> <option>--help</option>
         </term>
         <listitem>
           <para>Show summary of options.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>-d <replaceable>DAYS</replaceable></option>, <option>--days <replaceable>DAYS</replaceable></option>
+        <term><option>-d <replaceable>DAYS</replaceable></option> <option>--days <replaceable>DAYS</replaceable></option>
         </term>
         <listitem>
           <para>Delete files older then DAYS number of days. Default: 30</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>-T <replaceable>PATH</replaceable></option>, <option>--trash-path <replaceable>PATH</replaceable></option>
+        <term><option>-T <replaceable>PATH</replaceable></option> <option>--trash-path <replaceable>PATH</replaceable></option>
         </term>
         <listitem>
           <para>Use the given path as the location of the Trash directory, instead of the default: ~/.local/share/Trash .</para>
@@ -124,14 +124,21 @@ manpage.1: manpage.sgml
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>-v</option>, <option>--verbose</option>
+        <term><option>-D <replaceable>REGEX</replaceable></option> <option>--delete-first <replaceable>REGEX</replaceable></option>
+        </term>
+        <listitem>
+          <para>Delete any file which matches REGEX first, regardless of timestamp. REGEX must be a valid regular expression. If this option is used multiple times, the files matching the first regular expression are deleted first, then the second etc. Example, delete *.avi files first, then by age: --delete-first '.*\.avi'</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-v</option> <option>--verbose</option>
         </term>
         <listitem>
           <para>Output information on what is happening and why.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>-q</option>, <option>--quiet</option>
+        <term><option>-q</option> <option>--quiet</option>
         </term>
         <listitem>
           <para>Only output warnings.</para>
@@ -159,7 +166,7 @@ manpage.1: manpage.sgml
         </listitem>
       </varlistentry>      
       <varlistentry>
-        <term><option>-V</option>, <option>--version</option>
+        <term><option>-V</option> <option>--version</option>
         </term>
         <listitem>
           <para>Show version of program.</para>
@@ -188,6 +195,12 @@ manpage.1: manpage.sgml
         <term>&dhpackage; --min-free 2048</term>
         <listitem>
           <para>Purge files from trash, oldest first, till there is at least 2GB of space on the trash filesystem. There is no restriction on how old trashed files can get.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>&dhpackage; --min-free 2048 -D '.*\.bak' -D '.*\.avi'</term>
+        <listitem>
+          <para>Purge files from trash till there is at least 2GB of space on the trash filesystem. If we need to remove files, make sure we remove *.bak files first, then all *.avi files and after that the oldest to the newest. There is no restriction on how old trashed files can get. Please note that '.*\.bak' and '.*\.avi' are regular expressions and not glob patterns.</para>
         </listitem>
       </varlistentry>
       <varlistentry>

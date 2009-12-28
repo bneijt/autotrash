@@ -125,12 +125,12 @@ def main(args):
   parser.add_option('--max-free', dest='max_free', type='int', help='Only run if less then M megabytes of free space is left.', metavar='M')
   parser.add_option('--delete', dest='delete', type='int', help='Delete at least M megabytes.', metavar='M')
   parser.add_option('--min-free', dest='min_free', type='int', help='Set --delete to make use M megabytes of space is available.', metavar='M')
+  parser.add_option('-D', '--delete-first', action='append', dest='delete_first', help='Push files matching this REGEX to the top of the deletion queue', metavar='REGEX')
   parser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='Be more verbose, a must when testing something out')
   parser.add_option('-q', '--quiet', action='store_true', dest='quiet', help='Only output warnings')
   parser.add_option('--check', action='store_true', dest='check', help='Report .trashinfo files without a real file')
   parser.add_option('--dry-run', action='store_true', dest='dryrun', help='Just list what would have been done')
   parser.add_option('--stat', action='store_true', dest='stat', help='Show the number, and total size of files involved')
-  parser.add_option('-D', '--delete-first', action='append', dest='delete_first', help='Push files matching this REGEX to the top of the deletion queue', metavar='REGEX')
   parser.add_option('-V', '--version', action='store_true', dest='version', help='Show version and exit')
 #  parser.add_option('--toggle-cronjob', action='store_true', dest='toggle_cronjob', help='Install/Remove the hourly cronjob')
   (options, args) = parser.parse_args()
@@ -250,13 +250,15 @@ def main(args):
 
 
   #Push priority files (delete_first) to the top of the queue
-  for pattern in options.delete_first:
+  for pattern in reversed(options.delete_first):
     r = re.compile(pattern)
+    moved_count = 0
     for i in xrange(len(files)):
       if r.match(os.path.basename(files[i]['real_file'])) != None:
         file_info = files.pop(i)
         logging.log(VERBOSE, 'Pushing %s to top of queue because it matches %s', os.path.basename(file_info['real_file']), pattern )
-        files.insert(0, file_info)
+        files.insert(moved_count, file_info)
+        moved_count += 1
 
   total_size = 0
   deleted_size = 0
