@@ -1,5 +1,3 @@
-- Trash based on priority: documents are more important then movies, 
-  so trash movies first.
 - Write UnitTest to check conformance with the specifications
   here: http://www.ramendik.ru/docs/trashspec.html
 
