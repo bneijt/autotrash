@@ -124,7 +124,7 @@ def main(args):
   parser.add_option('-T', '--trash-path', dest='trash_path', help='Set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
   parser.add_option('--max-free', dest='max_free', type='int', help='Only run if less then M megabytes of free space is left.', metavar='M')
   parser.add_option('--delete', dest='delete', type='int', help='Delete at least M megabytes.', metavar='M')
-  parser.add_option('--min-free', dest='min_free', type='int', help='Set --delete to make use M megabytes of space is available.', metavar='M')
+  parser.add_option('--min-free', '--keep-free', dest='min_free', type='int', help='Set --delete to make use M megabytes of space is available.', metavar='M')
   parser.add_option('-D', '--delete-first', action='append', dest='delete_first', help='Push files matching this REGEX to the top of the deletion queue', metavar='REGEX')
   parser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='Be more verbose, a must when testing something out')
   parser.add_option('-q', '--quiet', action='store_true', dest='quiet', help='Only output warnings')
@@ -143,7 +143,7 @@ def main(args):
     logging.getLogger().setLevel(logging.WARNING)
 
   if options.version:
-    logging.info('''Version 0.1.1\nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\nLicense GPLv3+''')
+    logging.info('''Version 0.1.2\nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\nLicense GPLv3+''')
     return 1
   
   if options.delete + options.min_free + options.days == 0:
