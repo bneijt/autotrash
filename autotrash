@@ -1,20 +1,20 @@
 #!/usr/bin/python
-#        autotrash.py - GNOME GVFS Trash old file auto prune
-#        
-#        Copyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>
-#        
-#        This program is free software: you can redistribute it and/or modify
-#        it under the terms of the GNU General Public License as published by
-#        the Free Software Foundation, either version 3 of the License, or
-#        (at your option) any later version.
+#   autotrash.py - GNOME GVFS Trash old file auto prune
 #
-#        This program is distributed in the hope that it will be useful,
-#        but WITHOUT ANY WARRANTY; without even the implied warranty of
-#        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.    See the
-#        GNU General Public License for more details.
+#   Copyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>
 #
-#        You should have received a copy of the GNU General Public License
-#        along with this program.    If not, see <http://www.gnu.org/licenses/>.
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 import optparse
@@ -26,9 +26,29 @@ import time
 import math
 import logging
 import re
+import errno
+import stat
 
 # custom logging level between DEBUG and INFO
 VERBOSE = 15
+
+def on_remove_error(function, path, excinfo):
+    if execinfo[0] == errno.EPERM:
+        #Permission errors, try a chmod to recover
+        if function == os.remove:
+            #Tried to remove a file, but failed. Try to change the write permissions of the tree to delete it
+            logging.log(VERBOSE, 'Failed to remove file at: %s\n\tgot exception: %s\n\tchanging permissions and trying again.', path, str(excinfo))
+            os.chmod(path, stat.S_IWUSR)
+            os.unlink(path)
+            return
+        if function == os.rmdir:
+            #Tried to remove a directory, but failed. Try to change the write permissions of the tree to delete it
+            logging.log(VERBOSE, 'Failed to remove directory at: %s\n\tgot exception: %s\n\tchanging permissions and trying again.', path, str(excinfo))
+            os.chmod(path, stat.S_IWUSR)
+            os.unlink(path)
+            return
+    #Other error, what will it be?
+    logging.error('Failed to remove "%s", got exception: %s', path, str(excinfo))
 
 def real_file_name(trash_name):
     '''Get real file name from trashinfo file name: basename without extension in ../files'''
@@ -55,7 +75,7 @@ def purge(trash_directory, trash_name, dryrun):
     if os.path.exists(target):
         if os.path.isdir(target) and not os.path.islink(target):
             logging.log(VERBOSE, 'Removing directory %s', target)
-            shutil.rmtree(target)
+            shutil.rmtree(target, False, on_remove_error)
         else:
             logging.log(VERBOSE, 'Removing file %s', target)
             os.unlink(target)
@@ -279,7 +299,7 @@ def main(args):
     
     if options.stat:
         logging.info('Trash statistics:')
-        logging.info('    %6d entries at start (%s)', len(files), fmt_bytes(total_size))
+        logging.info('  %6d entries at start (%s)', len(files), fmt_bytes(total_size))
         logging.info(' -%6d deleted (%s)', deleted_files, fmt_bytes(deleted_size))
         logging.info(' =%6d remaining (%s)', (len(files) - deleted_files), fmt_bytes(total_size - deleted_size))
     return 0
