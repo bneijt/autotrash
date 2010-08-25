@@ -1,5 +1,5 @@
 Autotrash is a small python script to automatically remove
-(permenantly delete) old trashed files. It relies on the
+(permanently delete) old trashed files. It relies on the
 FreeDesktop.org Trash files for it's deletion information.
 
 It scans the ~/.local/share/Trash/info directory and reads the .trashinfo

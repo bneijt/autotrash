@@ -2,6 +2,7 @@
   here: http://www.ramendik.ru/docs/trashspec.html
 
 Long term / per request:
+- Python 3 support?
 - GTK+ interface with trash frequency graphs?
 - Move to python XDG as soon as it supports Trash information files
 - Add an option to have it register itself with crontab (an install yourself option).

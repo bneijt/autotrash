@@ -20,7 +20,7 @@ manpage.1: manpage.sgml
   <!ENTITY dhfirstname "<firstname>Bram</firstname>">
   <!ENTITY dhsurname   "<surname>Neijt</surname>">
   <!-- Please adjust the date whenever revising the manpage. -->
-  <!ENTITY dhdate      "<date>December 28, 2009</date>">
+  <!ENTITY dhdate      "<date>August 22, 2010</date>">
   <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
        allowed: see man(7), man(1). -->
   <!ENTITY dhsection   "<manvolnum>1</manvolnum>">
@@ -103,31 +103,31 @@ manpage.1: manpage.sgml
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--max-free <replaceable>N</replaceable></option>
+        <term><option>--max-free <replaceable>M</replaceable></option>
         </term>
         <listitem>
-          <para>Only delete files if there is less then <replaceable>N</replaceable> megabytes of free space left at the trash location. As an example, if you set this to 1024, then autotrash will only start to work if there is less then 1GB of free space in the trash. Till that time, autotrash will just exit normaly without scanning the Trash directory. If unsure, try running autotrash with <option>--dry-run</option> and <option>--verbose</option> to see the effect.</para>
+          <para>Only delete files if there is less then <replaceable>M</replaceable> megabytes of free space left at the trash location. As an example, if you set this to 1024, then autotrash will only start to work if there is less then 1GB of free space in the trash. Till that time, autotrash will just exit normally without scanning the Trash directory. If unsure, try running autotrash with <option>--dry-run</option> and <option>--verbose</option> to see the effect.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--delete <replaceable>N</replaceable></option>
+        <term><option>--delete <replaceable>M</replaceable></option>
         </term>
         <listitem>
-          <para>Delete at least <replaceable>N</replaceable> megabytes, deleting oldest trash addition first. It uses trash entries, NOT individual files. This means that if your oldest trashed item is a 1GB directory, and you request at least 10MB to be removed (N=10), &dhpackage; will remove 1GB. If unsure, try running autotrash with <option>--dry-run</option> and <option>--stat</option> to see the effect.</para>
+          <para>Delete at least <replaceable>M</replaceable> megabytes, deleting oldest trash addition first. It uses trash entries, NOT individual files. This means that if your oldest trashed item is a 1GB directory, and you request at least 10MB to be removed (M=10), &dhpackage; will remove 1GB. If unsure, try running autotrash with <option>--dry-run</option> and <option>--stat</option> to see the effect.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--min-free <replaceable>N</replaceable></option>
+        <term><option>--min-free <replaceable>M</replaceable></option> <option>--keep-free <replaceable>M</replaceable></option>
         </term>
         <listitem>
-          <para>Make sure there is a minimum of <replaceable>N</replaceable> megabytes of free space. If there is less free space, set <option>--delete</option> to the difference between <replaceable>N</replaceable> and the amount of free space. If unsure, try running autotrash with <option>--dry-run</option> and <option>--verbose</option> to see the effect.</para>
+          <para>Make sure there is a minimum of <replaceable>M</replaceable> megabytes of free space. If there is less free space, set <option>--delete</option> to the difference between <replaceable>M</replaceable> and the amount of free space. If unsure, try running autotrash with <option>--dry-run</option> and <option>--verbose</option> to see the effect.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
         <term><option>-D <replaceable>REGEX</replaceable></option> <option>--delete-first <replaceable>REGEX</replaceable></option>
         </term>
         <listitem>
-          <para>Delete any file which matches REGEX first, regardless of timestamp. REGEX must be a valid regular expression. If this option is used multiple times, the files matching the first regular expression are deleted first, then the second etc. Example, delete *.avi files first, then by age: --delete-first '.*\\.avi'</para>
+          <para>Delete any file which matches REGEX first, regardless of it's time-stamp. REGEX must be a valid regular expression. If this option is used multiple times, the files matching the first regular expression are deleted first, then the second etc. Example, delete *.avi files first, then by age: --delete-first '.*\\.avi'</para>
         </listitem>
       </varlistentry>
       <varlistentry>
