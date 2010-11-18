@@ -62,7 +62,8 @@ def purge(trash_directory, trash_name, dryrun):
     assert os.path.exists(trash_name)
     target = real_file_name(trash_name)
     if dryrun:
-        if os.path.exists(target):
+        #Broken links will not os.path.exist
+        if os.path.exists(target) or os.path.islink(target):
             logging.info('Remove %s', target)
         else:
             logging.info('Ignore %s', target)
@@ -71,14 +72,18 @@ def purge(trash_directory, trash_name, dryrun):
         else:
             logging.info('Ignore %s', trash_name)
         return False
+
     #The real deleting...
-    if os.path.exists(target):
-        if os.path.isdir(target) and not os.path.islink(target):
-            logging.log(VERBOSE, 'Removing directory %s', target)
-            shutil.rmtree(target, False, on_remove_error)
-        else:
-            logging.log(VERBOSE, 'Removing file %s', target)
-            os.unlink(target)
+    if os.path.islink(target):
+        logging.log(VERBOSE, 'Removing link %s', target)
+        os.unlink(target)
+    elif os.path.isdir(target):
+        logging.log(VERBOSE, 'Removing directory %s', target)
+        shutil.rmtree(target, False, on_remove_error)
+    else:
+        logging.log(VERBOSE, 'Removing file %s', target)
+        os.unlink(target)
+
     os.unlink(trash_name)
     return True
 
