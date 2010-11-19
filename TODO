@@ -3,6 +3,6 @@
 
 Long term / per request:
 - Python 3 support?
-- GTK+ interface with trash frequency graphs?
 - Move to python XDG as soon as it supports Trash information files
+  http://www.freedesktop.org/wiki/Software/pyxdg
 - Add an option to have it register itself with crontab (an install yourself option).

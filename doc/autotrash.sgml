@@ -220,10 +220,10 @@ manpage.1: manpage.sgml
         </listitem>
       </varlistentry>
       <varlistentry>
-        <listitem>
-          <para>Experienced users should consider adding autotrash as a crontab entry, using <term>crontab -e</term> and adding a line like:</para>
-        </listitem>
         <term>@hourly /usr/bin/&dhpackage; --max-free 4000 --min-free 2048 -d 30</term>
+        <listitem>
+          <para>Experienced users should consider adding autotrash as a crontab entry, using <command>crontab -e</command> and adding the line above.</para>
+        </listitem>
       </varlistentry>
     </variablelist>
   </refsect1>
