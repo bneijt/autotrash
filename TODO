@@ -2,7 +2,9 @@
   here: http://www.ramendik.ru/docs/trashspec.html
 
 Long term / per request:
-- Python 3 support?
 - Move to python XDG as soon as it supports Trash information files
   http://www.freedesktop.org/wiki/Software/pyxdg
-- Add an option to have it register itself with crontab (an install yourself option).
+- Add an option to have it register itself with crontab ("an install yourself option").
+  This would have been added already if there was a default library for this kind of
+  thing. I don't want to add this using my own line parser without getting a mail
+  requesting this.
