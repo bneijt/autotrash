@@ -145,18 +145,18 @@ def main(args):
             delete_first = [],
             version = False,
             )
-    parser.add_option('-d', '--days', dest='days', type='int', help='Delete files older then DAYS number of days.', metavar='DAYS')
-    parser.add_option('-T', '--trash-path', dest='trash_path', help='Set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
-    parser.add_option('--max-free', dest='max_free', type='int', help='Only run if less then M megabytes of free space is left.', metavar='M')
-    parser.add_option('--delete', dest='delete', type='int', help='Delete at least M megabytes.', metavar='M')
-    parser.add_option('--min-free', '--keep-free', dest='min_free', type='int', help='Set --delete to make use M megabytes of space is available.', metavar='M')
-    parser.add_option('-D', '--delete-first', action='append', dest='delete_first', help='Push files matching this REGEX to the top of the deletion queue', metavar='REGEX')
-    parser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='Be more verbose, a must when testing something out')
-    parser.add_option('-q', '--quiet', action='store_true', dest='quiet', help='Only output warnings')
-    parser.add_option('--check', action='store_true', dest='check', help='Report .trashinfo files without a real file')
-    parser.add_option('--dry-run', action='store_true', dest='dryrun', help='Just list what would have been done')
-    parser.add_option('--stat', action='store_true', dest='stat', help='Show the number, and total size of files involved')
-    parser.add_option('-V', '--version', action='store_true', dest='version', help='Show version and exit')
+    parser.add_option('-d', '--days', dest='days', type='int', help='delete files older then DAYS number of days.', metavar='DAYS')
+    parser.add_option('-T', '--trash-path', dest='trash_path', help='set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
+    parser.add_option('--max-free', dest='max_free', type='int', help='only run if less then M megabytes of free space is left.', metavar='M')
+    parser.add_option('--delete', dest='delete', type='int', help='delete at least M megabytes.', metavar='M')
+    parser.add_option('--min-free', '--keep-free', dest='min_free', type='int', help='set --delete to make use M megabytes of space is available.', metavar='M')
+    parser.add_option('-D', '--delete-first', action='append', dest='delete_first', help='push files matching this REGEX to the top of the deletion queue', metavar='REGEX')
+    parser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='be more verbose, a must when testing something out')
+    parser.add_option('-q', '--quiet', action='store_true', dest='quiet', help='only output warnings')
+    parser.add_option('--check', action='store_true', dest='check', help='report .trashinfo files without a real file')
+    parser.add_option('--dry-run', action='store_true', dest='dryrun', help='just list what would have been done')
+    parser.add_option('--stat', action='store_true', dest='stat', help='show the number, and total size of files involved')
+    parser.add_option('-V', '--version', action='store_true', dest='version', help='show version and exit')
 #    parser.add_option('--toggle-cronjob', action='store_true', dest='toggle_cronjob', help='Install/Remove the hourly cronjob')
     (options, args) = parser.parse_args()
     
@@ -196,7 +196,7 @@ def main(args):
         parser.error('Combining --delete and --min-free results in unpredictable behaviour as --delete may or may not be ignored depending on the free space.')
     
     if (not options.min_free) and options.delete_first:
-        parser.error('Using --delete-first (-D) without --min_free does not have any effect. Age based purging will still work as predicted.')
+        parser.error('Using --delete-first (-D) without --min-free does not have any effect. Age based purging will still work as predicted.')
 
 #    if options.toggle_cronjob:
 #        toggle_cronjob(args, options)

@@ -219,7 +219,13 @@ manpage.1: manpage.sgml
           <para>Start reading the trash if there is less than 4000MB of free space, then start keeping an eye on. At that point, remove files older than 30 days and if there is less than 2GB of free space after that remove even newer files.</para>
         </listitem>
       </varlistentry>
- 		</variablelist>
+      <varlistentry>
+        <listitem>
+          <para>Experienced users should consider adding autotrash as a crontab entry, using <term>crontab -e</term> and adding a line like:</para>
+        </listitem>
+        <term>@hourly /usr/bin/&dhpackage; --max-free 4000 --min-free 2048 -d 30</term>
+      </varlistentry>
+    </variablelist>
   </refsect1>
 <!--
   <refsect1>
