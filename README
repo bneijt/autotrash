@@ -4,7 +4,7 @@ Trash files for it's deletion information.
 
 It scans the ~/.local/share/Trash/info directory and reads the .trashinfo
 files to determine their deletion date. Files older then 30 days or files
-matching a perticular regular expression are then purged, including their
+matching a particular regular expression are then purged, including their
 trash information file.
 
         INSTALLATION
