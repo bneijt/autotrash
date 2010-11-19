@@ -20,11 +20,11 @@ manpage.1: manpage.sgml
   <!ENTITY dhfirstname "<firstname>Bram</firstname>">
   <!ENTITY dhsurname   "<surname>Neijt</surname>">
   <!-- Please adjust the date whenever revising the manpage. -->
-  <!ENTITY dhdate      "<date>August 22, 2010</date>">
+  <!ENTITY dhdate      "<date>November 19, 2010</date>">
   <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
        allowed: see man(7), man(1). -->
   <!ENTITY dhsection   "<manvolnum>1</manvolnum>">
-  <!ENTITY dhemail     "<email>bneijt@gmail.com</email>">
+  <!ENTITY dhemail     "<email>bram@neijt.nl</email>">
   <!ENTITY dhusername  "A. Bram Neijt">
   <!ENTITY dhucpackage "<refentrytitle>AUTOTRASH</refentrytitle>">
   <!ENTITY dhpackage   "autotrash">
@@ -44,7 +44,7 @@ manpage.1: manpage.sgml
       &dhsurname;
     </author>
     <copyright>
-      <year>2009</year>
+      <year>2010</year>
       <holder>&dhusername;</holder>
     </copyright>
     &dhdate;
@@ -63,7 +63,17 @@ manpage.1: manpage.sgml
     <cmdsynopsis>
       <command>&dhpackage;</command>
 
-      <arg><option>-d <replaceable>n_days_old</replaceable></option></arg>
+      <arg><option>-d <replaceable>purge_n_days_old</replaceable></option></arg>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>&dhpackage;</command>
+
+      <arg><option>--delete <replaceable>number_of_megabytes_to_purge</replaceable></option></arg>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>&dhpackage;</command>
+
+      <arg><option>--keep-free <replaceable>number_of_megabytes_to_free</replaceable></option></arg>
     </cmdsynopsis>
   </refsynopsisdiv>
   <refsect1>
@@ -72,7 +82,7 @@ manpage.1: manpage.sgml
     <para><command>&dhpackage;</command> is a program that looks in a FreeDesktop.org Trash folder for information on it's contents and then purges a part of the trash depending on the options.</para>
     <para>The most common option is <option>-d</option>, which will purge files that have been in the trash for more then a given number of days.</para>
     <para>The option <option>--delete</option> will remove at least the given number of megabytes from the trash, removing the oldest trash first.</para>
-    <para>Using <option>--min-free</option> will make sure at least the given number of megabytes of free space is available, by automatically setting <option>--delete</option> to the right value. For example, to keep at least a 1GB of free space, removing files from the Trash if needed, use <command>&dhpackage;</command> <option>--min-free</option> 1024 .</para>
+    <para>Using <option>--keep-free</option> will make sure at least the given number of megabytes of free space is available, by automatically setting <option>--delete</option> to the right value. For example, to keep at least a 1GB of free space, removing files from the trash if needed, use <command>&dhpackage;</command> <option>--keep-free</option> 1024 .</para>
 
   </refsect1>
   <refsect1>
@@ -85,14 +95,14 @@ manpage.1: manpage.sgml
         <term><option>-h</option> <option>--help</option>
         </term>
         <listitem>
-          <para>Show summary of options.</para>
+          <para>Show a summary of options.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
         <term><option>-d <replaceable>DAYS</replaceable></option> <option>--days <replaceable>DAYS</replaceable></option>
         </term>
         <listitem>
-          <para>Delete files older then DAYS number of days. Default: 30</para>
+          <para>Purge files older than DAYS number of days.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -106,14 +116,14 @@ manpage.1: manpage.sgml
         <term><option>--max-free <replaceable>M</replaceable></option>
         </term>
         <listitem>
-          <para>Only delete files if there is less then <replaceable>M</replaceable> megabytes of free space left at the trash location. As an example, if you set this to 1024, then autotrash will only start to work if there is less then 1GB of free space in the trash. Till that time, autotrash will just exit normally without scanning the Trash directory. If unsure, try running autotrash with <option>--dry-run</option> and <option>--verbose</option> to see the effect.</para>
+          <para>Only purge files if there is less than <replaceable>M</replaceable> megabytes of free space left at the trash location. As an example, if you set this to 1024, then autotrash will only start to work if there is less than 1GB of free space in the trash. Till that time, autotrash will just exit normally without scanning the Trash directory. If unsure, try running autotrash with <option>--dry-run</option> and <option>--verbose</option> to see the effect.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
         <term><option>--delete <replaceable>M</replaceable></option>
         </term>
         <listitem>
-          <para>Delete at least <replaceable>M</replaceable> megabytes, deleting oldest trash addition first. It uses trash entries, NOT individual files. This means that if your oldest trashed item is a 1GB directory, and you request at least 10MB to be removed (M=10), &dhpackage; will remove 1GB. If unsure, try running autotrash with <option>--dry-run</option> and <option>--stat</option> to see the effect.</para>
+          <para>Purge at least <replaceable>M</replaceable> megabytes, deleting oldest trash addition first. It uses trash entries, NOT individual files. This means that if your oldest trashed item is a 1GB directory, and you request at least 10MB to be removed (M=10), &dhpackage; will remove 1GB. If unsure, try running autotrash with both <option>--dry-run</option> and <option>--stat</option> to see the effect.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -127,7 +137,7 @@ manpage.1: manpage.sgml
         <term><option>-D <replaceable>REGEX</replaceable></option> <option>--delete-first <replaceable>REGEX</replaceable></option>
         </term>
         <listitem>
-          <para>Delete any file which matches REGEX first, regardless of it's time-stamp. REGEX must be a valid regular expression. If this option is used multiple times, the files matching the first regular expression are deleted first, then the second etc. Example, delete *.avi files first, then by age: --delete-first '.*\\.avi'</para>
+          <para>Purge any file which matches REGEX first, regardless of it's time-stamp. REGEX must be a valid regular expression. If this option is used multiple times, the files matching the first regular expression are deleted first, then the second etc. Example, delete any *.avi files first, then by age: --delete-first '.*\\.avi'</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -148,7 +158,7 @@ manpage.1: manpage.sgml
         <term><option>--check</option>
         </term>
         <listitem>
-          <para>Report .trashinfo files that point to a non-existing file. This will only happen with a broken Trash can and autotrash will not touch these files. It is left up to the user to actually do something with this information. As soon as the files become old enough, they will be removed automatically.</para>
+          <para>Report .trashinfo files that point to a non-existing file. This will only happen with a broken Trashcan. It is left up to the user to actually do something with this information. These files will be removed as soon as the mentioned file would be removed by autotrash.</para>
         </listitem>
       </varlistentry> 
       <varlistentry>
@@ -164,12 +174,12 @@ manpage.1: manpage.sgml
         <listitem>
           <para>Show the number, and total size of files involved.</para>
         </listitem>
-      </varlistentry>      
+      </varlistentry>
       <varlistentry>
         <term><option>-V</option> <option>--version</option>
         </term>
         <listitem>
-          <para>Show version of program.</para>
+          <para>Show the version of program.</para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -182,19 +192,19 @@ manpage.1: manpage.sgml
       <varlistentry>
         <term>&dhpackage; -d 30</term>
         <listitem>
-          <para>Purge any file that has been in the trash for more then 30 days</para>
+          <para>Purge any file that has been in the trash for more then 30 days.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
         <term>&dhpackage; --max-free 1024 -d 30</term>
         <listitem>
-          <para>Only purge files from the trash if there is less then 1GB of space left on the trash filesystem.</para>
+          <para>Only purge files from the trash if there is less than 1GB of space left on the trash filesystem. If so, only trash files that are older than 30 days.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
         <term>&dhpackage; --min-free 2048</term>
         <listitem>
-          <para>Purge files from trash, oldest first, till there is at least 2GB of space on the trash filesystem. There is no restriction on how old trashed files can get.</para>
+          <para>Purge files from trash, oldest first, till there is at least 2GB of space on the trash filesystem. There is no restriction on how old trashed files are.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -206,7 +216,7 @@ manpage.1: manpage.sgml
       <varlistentry>
         <term>&dhpackage; --max-free 4000 --min-free 2048 -d 30</term>
         <listitem>
-          <para>Start reading the trash if there is less then 4000MB of free space, then start keeping an eye on. At that point, remove files older then 30 days and if there is less then 2GB of free space after that remove even newer files.</para>
+          <para>Start reading the trash if there is less than 4000MB of free space, then start keeping an eye on. At that point, remove files older than 30 days and if there is less than 2GB of free space after that remove even newer files.</para>
         </listitem>
       </varlistentry>
  		</variablelist>
@@ -228,7 +238,7 @@ manpage.1: manpage.sgml
     <para>This manual page was written by &dhusername; &dhemail; for
       the &debian; system (and may be used by others).  Permission is
       granted to copy, distribute and/or modify this document under
-      the terms of the &gnu; General Public License, Version 3 any
+      the terms of the &gnu; General Public License, Version 3 or any
       later version published by the Free Software Foundation.
     </para>
     <para>
