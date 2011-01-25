@@ -163,7 +163,7 @@ def main(args):
     parser.add_option('-V', '--version', action='store_true', dest='version', help='show version and exit')
 #    parser.add_option('--toggle-cronjob', action='store_true', dest='toggle_cronjob', help='Install/Remove the hourly cronjob')
     (options, args) = parser.parse_args()
-    
+
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     logging.addLevelName(VERBOSE, 'VERBOSE')
     if options.verbose:
@@ -174,7 +174,7 @@ def main(args):
     if options.version:
         logging.info('''Version 0.1.4\nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\nLicense GPLv3+''')
         return 1
-    
+
     if options.delete + options.min_free + options.days == 0:
         parser.error('You need to specify at least one of:\n\t -d <days of age to purge>,\n\t --delete <number of megabytes to purge>, or\n\t --min-free <number of megabytes to make free>\n for this command to have any effect.')
 
@@ -183,10 +183,10 @@ def main(args):
 
     if options.max_free < 0:
         parser.error('Can not work with a negative value for --max-free')
-    
+
     if options.delete < 0:
         parser.error('Can not work with a negative value for --delete')
-    
+
     if options.min_free < 0:
         parser.error('Can not work with a negative value for --min-free')
 
@@ -195,24 +195,24 @@ def main(args):
 
     if options.verbose and options.quiet:
         parser.error('Specifying both --quiet and --verbose does not make sense')
-    
+
     if options.delete and options.min_free:
         parser.error('Combining --delete and --min-free results in unpredictable behaviour as --delete may or may not be ignored depending on the free space.')
-    
+
     if (not options.min_free) and options.delete_first:
         parser.error('Using --delete-first (-D) without --min-free does not have any effect. Age based purging will still work as predicted.')
 
 #    if options.toggle_cronjob:
 #        toggle_cronjob(args, options)
 #        return 0
-    
-        
+
+
     trash_info_path = os.path.expanduser(os.path.join(options.trash_path,'info'))
     if not os.path.exists(trash_info_path):
         logging.error('Can not find trash information directory. Make sure you have at least GNOME 2.24')
         logging.error('I was looking at: %s', trash_info_path)
         return 1
-    
+
     if options.max_free or options.min_free: #Free space calculation is needed
         fs_stat = os.statvfs(trash_info_path)
         if fs_stat.f_bsize <= 0:
@@ -229,12 +229,12 @@ def main(args):
         if options.min_free and free_megabytes < options.min_free:
             options.delete = options.min_free - free_megabytes
             logging.log(VERBOSE, 'Setting --delete to %i to make sure at least %i MB becomes free.\n\t Currently we have %i megabytes of free space.', options.delete, options.min_free, free_megabytes)
-    
-    
+
+
     deleted_target = 0
     if options.delete:
         deleted_target = options.delete * 1024 * 1024
-        
+
     #Collect file info's
     files = []
     if True: #Scope protection
@@ -274,7 +274,7 @@ def main(args):
                 logging.log(VERBOSE, '    consumes %s', fmt_bytes(file_info['size']))
 
             files.append(file_info)
-    
+
     #Kill sorting: first will get purged first if --delete is enabled
     def oldest_first_cmp(a,b):
         return int(a['time'] - b['time'])
@@ -305,7 +305,7 @@ def main(args):
                 if deleted_target:
                     deleted_size += file_info['size']
                 deleted_files += 1
-    
+
     if options.stat:
         logging.info('Trash statistics:')
         logging.info('  %6d entries at start (%s)', len(files), fmt_bytes(total_size))
