@@ -33,7 +33,7 @@ import stat
 VERBOSE = 15
 
 def on_remove_error(function, path, excinfo):
-    if execinfo[0] == errno.EPERM:
+    if excinfo[0] == errno.EPERM:
         #Permission errors, try a chmod to recover
         if function == os.remove:
             #Tried to remove a file, but failed. Try to change the write permissions of the tree to delete it
