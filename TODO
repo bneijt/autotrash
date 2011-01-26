@@ -6,5 +6,5 @@ Long term / per request:
   http://www.freedesktop.org/wiki/Software/pyxdg
 - Add an option to have it register itself with crontab ("an install yourself option").
   This would have been added already if there was a default library for this kind of
-  thing. I don't want to add this using my own line parser without getting a mail
+  thing. I don't want to add this using my own line parser without getting an email
   requesting this.
