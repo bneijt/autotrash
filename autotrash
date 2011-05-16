@@ -153,7 +153,7 @@ def main(args):
     parser.add_option('-T', '--trash-path', dest='trash_path', help='set Trash path to PATH. Default: %s' % parser.defaults['trash_path'], metavar='PATH')
     parser.add_option('--max-free', dest='max_free', type='int', help='only run if less then M megabytes of free space is left.', metavar='M')
     parser.add_option('--delete', dest='delete', type='int', help='delete at least M megabytes.', metavar='M')
-    parser.add_option('--min-free', '--keep-free', dest='min_free', type='int', help='set --delete to make use M megabytes of space is available.', metavar='M')
+    parser.add_option('--min-free', '--keep-free', dest='min_free', type='int', help='set --delete to make sure M megabytes of space is available.', metavar='M')
     parser.add_option('-D', '--delete-first', action='append', dest='delete_first', help='push files matching this REGEX to the top of the deletion queue', metavar='REGEX')
     parser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='be more verbose, a must when testing something out')
     parser.add_option('-q', '--quiet', action='store_true', dest='quiet', help='only output warnings')
