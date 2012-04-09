@@ -2,19 +2,20 @@ Autotrash is a small python script to automatically remove
 (permanently delete) trashed files. It relies on the FreeDesktop.org
 Trash files for it's deletion information.
 
-It scans the ~/.local/share/Trash/info directory and reads the .trashinfo
+It scans the `~/.local/share/Trash/info` directory and reads the `.trashinfo`
 files to determine their deletion date. Files older then 30 days or files
 matching a particular regular expression are then purged, including their
 trash information file.
 
-        INSTALLATION
+INSTALLATION
+------------
 It should be considered to be run as a crontab entry:
 
-@daily  /usr/bin/autotrash -d 30
+    @daily  /usr/bin/autotrash -d 30
 
 Or more frequently, but to keep disk IO down, only when there is less then 3GB of free space:
 
-@hourly /usr/bin/autotrash --max-free 3072 -d 30
+    @hourly /usr/bin/autotrash --max-free 3072 -d 30
 
 To configure this, run "crontab -e" and add one of these lines in the 
 editor, then save and close the file.
