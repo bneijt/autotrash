@@ -238,7 +238,8 @@ def main(args):
     #Collect file info's
     files = []
     if True: #Scope protection
-        for file_name in glob.iglob(os.path.join(trash_info_path, '*.trashinfo')):
+        trash_info_file_names = [ os.path.join(trash_info_path, fn) for fn in os.listdir(trash_info_path) if fn.endswith(".trashinfo")]
+        for file_name in trash_info_file_names:
             real_file = real_file_name(file_name)
             file_info = {
                 'trash_info': file_name,
