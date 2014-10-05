@@ -20,7 +20,6 @@ import sys
 import optparse
 import ConfigParser
 import shutil
-import glob
 import os
 import time
 import math
@@ -222,7 +221,7 @@ def main(args):
 
         if options.max_free:
             #Check if there is less then max_free megabytes of free space
-            #if there is not less, then do nothing and skip the glob.
+            #if there is not less, then do nothing
             if free_megabytes > options.max_free:
                 logging.log(VERBOSE, 'I see %i MB of free space at "%s"\n    which is more then --max-free, doing nothing.', free_megabytes, trash_info_path)
                 return 0
@@ -238,7 +237,7 @@ def main(args):
     #Collect file info's
     files = []
     if True: #Scope protection
-        trash_info_file_names = [ os.path.join(trash_info_path, fn) for fn in os.listdir(trash_info_path) if fn.endswith(".trashinfo")]
+        trash_info_file_names = [ os.path.join(trash_info_path, fn) for fn in os.listdir(trash_info_path) if (fn.endswith(".trashinfo") and os.path.isfile(fn))]
         for file_name in trash_info_file_names:
             real_file = real_file_name(file_name)
             file_info = {
