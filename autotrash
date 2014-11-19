@@ -123,7 +123,7 @@ def fmt_bytes(bytes, fmt='%.1f'):
             return '%s %s' % (fmt % (float(bytes) / size), name)
     return '%d bytes' % bytes
 
-def find_trash_directories(override_dir=None):
+def find_trash_directories(override_dir=None, find_mounts=False):
     if override_dir:
         return [override_dir]
     
@@ -135,20 +135,21 @@ def find_trash_directories(override_dir=None):
     logging.log(VERBOSE, "Found trash directory: %s" % (trash_path))
     
     # Add trash "top directories" in all mount points (if they exist)
-    with open("/proc/mounts", "r") as mounts:
-        for line in mounts.readlines():
-            mount_path = line.split()[1]
-            
-            # Find a usable trash path on this device
-            trash_path_options = [
-                os.path.join(mount_path, ".Trash", str(os.getuid())),
-                os.path.join(mount_path, ".Trash-%d" % (os.getuid()))
-            ]
-            for trash_path in trash_path_options:
-                if os.path.exists(trash_path):
-                    logging.log(VERBOSE, "Found trash directory: %s" % (trash_path))
-                    trash_paths.append(trash_path)
-                    break
+    if find_mounts:
+        with open("/proc/mounts", "r") as mounts:
+            for line in mounts.readlines():
+                mount_path = line.split()[1]
+                
+                # Find a usable trash path on this device
+                trash_path_options = [
+                    os.path.join(mount_path, ".Trash", str(os.getuid())),
+                    os.path.join(mount_path, ".Trash-%d" % (os.getuid()))
+                ]
+                for trash_path in trash_path_options:
+                    if os.path.exists(trash_path):
+                        logging.log(VERBOSE, "Found trash directory: %s" % (trash_path))
+                        trash_paths.append(trash_path)
+                        break
     
     return trash_paths
 
@@ -179,7 +180,8 @@ def main(args):
             version = False,
             )
     parser.add_option('-d', '--days', dest='days', type='int', help='delete files older then DAYS number of days.', metavar='DAYS')
-    parser.add_option('-T', '--trash-path', dest='trash_path', help='use only the given Trash path PATH instead processing all standard directories', metavar='PATH')
+    parser.add_option('-T', '--trash-path', dest='trash_path', help='empty the trash path in the given DIRECTORY instead of using the user home directory', metavar='DIRECTORY')
+    parser.add_option('-t', '--trash-mounts', dest='trash_mounts', action='store_true', default=False, help='Process all user trash directories instead of just the one in the home directory')
     parser.add_option('--max-free', dest='max_free', type='int', help='only run if less then M megabytes of free space is left.', metavar='M')
     parser.add_option('--delete', dest='delete', type='int', help='delete at least M megabytes.', metavar='M')
     parser.add_option('--min-free', '--keep-free', dest='min_free', type='int', help='set --delete to make sure M megabytes of space is available.', metavar='M')
@@ -219,6 +221,9 @@ def main(args):
     if options.min_free < 0:
         parser.error('Can not work with a negative value for --min-free')
 
+    if options.trash_path and options.trash_mounts:
+        parser.error('Cannot auto-detect trash directories when setting a specific one')
+    
     if options.stat and options.quiet:
         parser.error('Specifying both --quiet and --stat does not make sense')
 
@@ -236,7 +241,7 @@ def main(args):
 #        return 0
 
     # Compile list of possible trash directories
-    trash_paths = find_trash_directories(options.trash_path)
+    trash_paths = find_trash_directories(options.trash_path, options.trash_mounts)
     
     # Set variables for stats collecting
     total_size = 0
