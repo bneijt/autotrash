@@ -23,7 +23,11 @@ Configuration
 -------------
 It should be considered to be run as a crontab entry:
 
-    @daily  /usr/bin/autotrash -d 30
+    @daily /usr/bin/autotrash -d 30
+
+You can also make `autotrash` process all user trash directories (not just in your home directory) by adding this crontab entry:
+
+    @daily /usr/bin/autotrash -td 30
 
 Or more frequently, but to keep disk IO down, only when there is less then 3GB of free space:
 
