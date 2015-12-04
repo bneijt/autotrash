@@ -126,20 +126,20 @@ def fmt_bytes(bytes, fmt='%.1f'):
 def find_trash_directories(override_dir=None, find_mounts=False):
     if override_dir:
         return [override_dir]
-    
+
     trash_paths = []
-    
+
     # Add user trash directory
     trash_path = os.path.join(os.environ.get('XDG_DATA_HOME', os.path.expanduser('~/.local/share')), 'Trash')
     trash_paths.append(trash_path)
     logging.log(VERBOSE, "Found trash directory: %s" % (trash_path))
-    
+
     # Add trash "top directories" in all mount points (if they exist)
     if find_mounts:
         with open("/proc/mounts", "r") as mounts:
             for line in mounts.readlines():
                 mount_path = line.split()[1]
-                
+
                 # Find a usable trash path on this device
                 trash_path_options = [
                     os.path.join(mount_path, ".Trash", str(os.getuid())),
@@ -150,7 +150,7 @@ def find_trash_directories(override_dir=None, find_mounts=False):
                         logging.log(VERBOSE, "Found trash directory: %s" % (trash_path))
                         trash_paths.append(trash_path)
                         break
-    
+
     return trash_paths
 
 #def toggle_cronjob(args, options):
@@ -223,7 +223,7 @@ def main(args):
 
     if options.trash_path and options.trash_mounts:
         parser.error('Cannot auto-detect trash directories when setting a specific one')
-    
+
     if options.stat and options.quiet:
         parser.error('Specifying both --quiet and --stat does not make sense')
 
@@ -242,13 +242,13 @@ def main(args):
 
     # Compile list of possible trash directories
     trash_paths = find_trash_directories(options.trash_path, options.trash_mounts)
-    
+
     # Set variables for stats collecting
     total_size = 0
     total_files = 0
     deleted_size = 0
     deleted_files = 0
-    
+
     for trash_path in trash_paths:
         trash_info_path = os.path.expanduser(os.path.join(trash_path, 'info'))
         if not os.path.exists(trash_info_path):
@@ -343,7 +343,7 @@ def main(args):
                 if deleted_target or options.stat:
                     deleted_size += file_info['size']
                     deleted_files += 1
-    
+
     if options.stat:
         logging.info('Trash statistics:')
         logging.info('  %6d entries at start (%s)', total_files, fmt_bytes(total_size))
