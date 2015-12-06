@@ -7,6 +7,8 @@ files to determine their deletion date. Files older then 30 days or files
 matching a particular regular expression are then purged, including their
 trash information file.
 
+![Travis CI build status](https://api.travis-ci.org/bneijt/autotrash.svg)
+
 Installation
 ------------
 
