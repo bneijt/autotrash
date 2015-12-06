@@ -88,6 +88,9 @@ This program follows the usual GNU command line syntax, with long options  start
 -V --version
 :   Show the version of program.
 
+
+The exit status of **autotrash** will be 1 if a corrupt trashinfo file is found.
+
 # EXAMPLES
 
 Examples of program use.
