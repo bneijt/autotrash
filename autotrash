@@ -92,13 +92,16 @@ def purge(trash_directory, trash_name, dryrun):
     return True
 
 def trash_info_date(fname):
-    parser = configparser.SafeConfigParser()
-    readCorrectly = parser.read(fname)
-    section = 'Trash Info'
-    key = 'DeletionDate'
-    if readCorrectly.count(fname) and parser.has_option(section, key):
-        #Read the file succesfully
-        return time.strptime(parser.get(section, key), '%Y-%m-%dT%H:%M:%S')
+    try:
+        parser = configparser.SafeConfigParser()
+        readCorrectly = parser.read(fname)
+        section = 'Trash Info'
+        key = 'DeletionDate'
+        if readCorrectly.count(fname) and parser.has_option(section, key):
+            #Read the file succesfully
+            return time.strptime(parser.get(section, key), '%Y-%m-%dT%H:%M:%S')
+    except Exception as e:
+        logging.warning("Failed to read %s: %s", fname, e)
     return None
 
 def get_consumed_size(path):
