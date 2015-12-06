@@ -1,0 +1,5 @@
+/__pycache__
+/autotrash.egg-info
+/autotrashc
+/virtualenv
+*.pyc
