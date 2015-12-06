@@ -197,7 +197,7 @@ def main(args):
         logging.getLogger().setLevel(logging.WARNING)
 
     if options.version:
-        logging.info('''Version 0.1.5\nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\nLicense GPLv3+''')
+        logging.info('''Version 0.2.0\nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\nLicense GPLv3+''')
         return 1
 
     if options.delete + options.min_free + options.days == 0:
