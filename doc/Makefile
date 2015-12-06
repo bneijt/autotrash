@@ -2,8 +2,8 @@
 all: autotrash.1
 	
 
-autotrash.1: autotrash.sgml
-	docbook-to-man $< > $@
+autotrash.1: autotrash.md
+	pandoc -s -t man $< > $@
 
 clean:
 	rm -f autotrash.1
