@@ -156,15 +156,6 @@ def find_trash_directories(override_dir=None, find_mounts=False):
 
     return trash_paths
 
-#def toggle_cronjob(args, options):
-#    prefix = '0 * * * *    ' #Hourly
-#    command = args[0]            #Reconstruct command
-#    #Reconstruct arguments
-#    assert False #TODO
-#    flags = ["'%s'" % s for s in args[1:]]
-#    flags = flags.replace('')
-
-
 def main(args):
     #Load and set configuration options
     parser = optparse.OptionParser(usage='%prog -d <days of age to purge>')
@@ -195,7 +186,6 @@ def main(args):
     parser.add_option('--dry-run', action='store_true', dest='dryrun', help='just list what would have been done')
     parser.add_option('--stat', action='store_true', dest='stat', help='show the number, and total size of files involved')
     parser.add_option('-V', '--version', action='store_true', dest='version', help='show version and exit')
-#    parser.add_option('--toggle-cronjob', action='store_true', dest='toggle_cronjob', help='Install/Remove the hourly cronjob')
     (options, args) = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -239,9 +229,6 @@ def main(args):
     if (not options.min_free) and options.delete_first:
         parser.error('Using --delete-first (-D) without --min-free does not have any effect. Age based purging will still work as predicted.')
 
-#    if options.toggle_cronjob:
-#        toggle_cronjob(args, options)
-#        return 0
 
     # Compile list of possible trash directories
     trash_paths = find_trash_directories(options.trash_path, options.trash_mounts)
