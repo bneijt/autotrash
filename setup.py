@@ -3,7 +3,7 @@ from distutils.core import setup
 
 setup(
   name=         'autotrash',
-  version=      '0.2.0',
+  version=      '0.2.1',
   author=       'A. Bram Neijt',
   author_email= 'bram@neijt.nl',
   url=          'http://logfish.net/pr/autotrash/',
