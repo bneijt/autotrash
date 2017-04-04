@@ -240,6 +240,8 @@ def main(args):
     deleted_size = 0
     deleted_files = 0
 
+    failures = 0
+    
     for trash_path in trash_paths:
         trash_info_path = os.path.expanduser(os.path.join(trash_path, 'info'))
         if not os.path.exists(trash_info_path):
@@ -270,7 +272,6 @@ def main(args):
 
         #Collect file info's
         files = []
-        failures = 0
         if True: #Scope protection
             trash_info_file_names = [ os.path.join(trash_info_path, fn) for fn in os.listdir(trash_info_path) if fn.endswith(".trashinfo")]
             for file_name in trash_info_file_names:
