@@ -28,6 +28,7 @@ import logging
 import re
 import errno
 import stat
+import dateutil.parser
 
 # custom logging level between DEBUG and INFO
 VERBOSE = 15
@@ -99,7 +100,7 @@ def trash_info_date(fname):
         key = 'DeletionDate'
         if readCorrectly.count(fname) and parser.has_option(section, key):
             #Read the file succesfully
-            return time.strptime(parser.get(section, key), '%Y-%m-%dT%H:%M:%S')
+            return dateutil.parser.parse(parser.get(section, key))
     except Exception as e:
         #Error because exit status will be >0 because of this
         logging.error("Failed to read %s: %s", fname, e)
@@ -241,7 +242,7 @@ def main(args):
     deleted_files = 0
 
     failures = 0
-    
+
     for trash_path in trash_paths:
         trash_info_path = os.path.expanduser(os.path.join(trash_path, 'info'))
         if not os.path.exists(trash_info_path):
