@@ -4,3 +4,4 @@
 /virtualenv
 /doc/autotrash.1
 *.pyc
+/.idea
