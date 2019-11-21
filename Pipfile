@@ -1,0 +1,2 @@
+[packages]
+autotrash = {path = ".", editable = true, extras = ["testing"]}

@@ -1,0 +1,3 @@
+[console_scripts]
+autotrash = autotrash.app:main
+
