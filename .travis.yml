@@ -8,6 +8,6 @@ install:
     - pipenv update --dev
 
 script:
-    - pipenv run -- pytest
-    - pipenv run -- autotrash --help
+    - pytest
+    - autotrash --help
 
