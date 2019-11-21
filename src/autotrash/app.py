@@ -1,7 +1,7 @@
 #!/usr/bin/python
-#   autotrash.py - GNOME GVFS Trash old file auto prune
+#   autotrash - GNOME GVFS Trash old file auto prune
 #
-#   Copyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>
+#   Copyright (C) 2019 A. Bram Neijt <bneijt@gmail.com>
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -15,19 +15,19 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-import sys
-import optparse
 import configparser
-import shutil
-import glob
-import os
-import time
-import math
-import logging
-import re
 import errno
+import logging
+import optparse
+import os
+import re
+import shutil
 import stat
+import sys
+import time
+
+import math
+from autotrash import __version__
 
 # custom logging level between DEBUG and INFO
 VERBOSE = 15
@@ -35,35 +35,41 @@ VERBOSE = 15
 
 def on_remove_error(function, path, excinfo):
     if excinfo[0] == errno.EPERM:
-        #Permission errors, try a chmod to recover
+        # Permission errors, try a chmod to recover
         if function == os.remove:
-            #Tried to remove a file, but failed. Try to change the write permissions of the tree to delete it
-            logging.log(VERBOSE, 'Failed to remove file at: %s\n\tgot exception: %s\n\tchanging permissions and trying again.', path, str(excinfo))
+            # Tried to remove a file, but failed. Try to change the write permissions of the tree to delete it
+            logging.log(VERBOSE,
+                        'Failed to remove file at: %s\n\tgot exception: %s\n\tchanging permissions and trying again.',
+                        path, str(excinfo))
             os.chmod(path, stat.S_IWUSR)
             os.unlink(path)
             return
         if function == os.rmdir:
-            #Tried to remove a directory, but failed. Try to change the write permissions of the tree to delete it
-            logging.log(VERBOSE, 'Failed to remove directory at: %s\n\tgot exception: %s\n\tchanging permissions and trying again.', path, str(excinfo))
+            # Tried to remove a directory, but failed. Try to change the write permissions of the tree to delete it
+            logging.log(VERBOSE,
+                        'Failed to remove directory at: %s\n\tgot exception: %s\n\tchanging permissions and trying again.',
+                        path, str(excinfo))
             os.chmod(path, stat.S_IWUSR)
             os.unlink(path)
             return
-    #Other error, what will it be?
+    # Other error, what will it be?
     logging.error('Failed to remove "%s", got exception: %s', path, str(excinfo))
 
+
 def real_file_name(trash_name):
-    '''Get real file name from trashinfo file name: basename without extension in ../files'''
+    """Get real file name from trashinfo file name: basename without extension in ../files"""
     basename = os.path.basename(trash_name)
     trash_directory = os.path.abspath(os.path.join(os.path.dirname(trash_name), '..'))
     (file_name, trashinfo_ext) = os.path.splitext(basename)
     return os.path.join(trash_directory, 'files', file_name)
 
+
 def purge(trash_directory, trash_name, dryrun):
-    '''Purge the file behind the trash file fname'''
+    """Purge the file behind the trash file fname"""
     assert os.path.exists(trash_name)
     target = real_file_name(trash_name)
     if dryrun:
-        #Broken links will not os.path.exist
+        # Broken links will not os.path.exist
         if os.path.exists(target) or os.path.islink(target):
             logging.info('Remove %s', target)
         else:
@@ -74,7 +80,7 @@ def purge(trash_directory, trash_name, dryrun):
             logging.info('Ignore %s', trash_name)
         return False
 
-    #The real deleting...
+    # The real deleting...
     if os.path.islink(target):
         logging.log(VERBOSE, 'Removing link %s', target)
         os.unlink(target)
@@ -82,7 +88,7 @@ def purge(trash_directory, trash_name, dryrun):
         logging.log(VERBOSE, 'Removing directory %s', target)
         shutil.rmtree(target, False, on_remove_error)
     else:
-        #Make sure we do not try to unlink a file that does not exist.
+        # Make sure we do not try to unlink a file that does not exist.
         if os.path.exists(target):
             logging.log(VERBOSE, 'Removing file %s', target)
             os.unlink(target)
@@ -92,22 +98,24 @@ def purge(trash_directory, trash_name, dryrun):
     os.unlink(trash_name)
     return True
 
+
 def trash_info_date(fname):
     try:
         parser = configparser.SafeConfigParser()
-        readCorrectly = parser.read(fname)
+        read_correctly = parser.read(fname)
         section = 'Trash Info'
         key = 'DeletionDate'
-        if readCorrectly.count(fname) and parser.has_option(section, key):
-            #Read the file succesfully
+        if read_correctly.count(fname) and parser.has_option(section, key):
+            # Read the file succesfully
             return time.strptime(parser.get(section, key), '%Y-%m-%dT%H:%M:%S')
     except Exception as e:
-        #Error because exit status will be >0 because of this
+        # Error because exit status will be >0 because of this
         logging.error("Failed to read %s: %s", fname, e)
     return None
 
+
 def get_consumed_size(path):
-    '''Get the amount of filesystem space actually consumed by a file or directory'''
+    """Get the amount of filesystem space actually consumed by a file or directory"""
     size = 0
     try:
         if os.path.islink(path):
@@ -121,12 +129,14 @@ def get_consumed_size(path):
         logging.error('Error getting size for %s', path)
     return size
 
-def fmt_bytes(bytes, fmt='%.1f'):
-    #If you NEED EiB, ZiB or YiB, please send me a mail I woul love to hear from you.
-    for size, name in    (1<<50, 'PiB'), (1<<40, 'TiB'), (1<<30, 'GiB'), (1<<20, 'MiB'), (1<<10, 'KiB'):
-        if bytes >= size:
-            return '%s %s' % (fmt % (float(bytes) / size), name)
-    return '%d bytes' % bytes
+
+def fmt_bytes(num_bytes, fmt='%.1f'):
+    # If you NEED EiB, ZiB or YiB, please send me a mail I would love to hear from you!
+    for size, name in (1 << 50, 'PiB'), (1 << 40, 'TiB'), (1 << 30, 'GiB'), (1 << 20, 'MiB'), (1 << 10, 'KiB'):
+        if num_bytes >= size:
+            return '%s %s' % (fmt % (float(num_bytes) / size), name)
+    return '%d bytes' % num_bytes
+
 
 def find_trash_directories(override_dir=None, find_mounts=False):
     if override_dir:
@@ -158,36 +168,93 @@ def find_trash_directories(override_dir=None, find_mounts=False):
 
     return trash_paths
 
+
 def main():
-    #Load and set configuration options
+    # Load and set configuration options
     parser = optparse.OptionParser(usage='%prog -d <days of age to purge>')
     parser.set_defaults(
-            days = 0,
-            trash_path = None,
-            max_free = 0,
-            delete = 0,
-            min_free = 0,
-            verbose = False,
-            quiet = False,
-            check = False,
-            dryrun = False,
-            stat = False,
-            delete_first = [],
-            version = False,
-            )
-    parser.add_option('-d', '--days', dest='days', type='int', help='delete files older then DAYS number of days.', metavar='DAYS')
-    parser.add_option('-T', '--trash-path', dest='trash_path', help='empty the trash path in the given DIRECTORY instead of using the user home directory', metavar='DIRECTORY')
-    parser.add_option('-t', '--trash-mounts', dest='trash_mounts', action='store_true', default=False, help='Process all user trash directories instead of just the one in the home directory')
-    parser.add_option('--max-free', dest='max_free', type='int', help='only run if less then M megabytes of free space is left.', metavar='M')
-    parser.add_option('--delete', dest='delete', type='int', help='delete at least M megabytes.', metavar='M')
-    parser.add_option('--min-free', '--keep-free', dest='min_free', type='int', help='set --delete to make sure M megabytes of space is available.', metavar='M')
-    parser.add_option('-D', '--delete-first', action='append', dest='delete_first', help='push files matching this REGEX to the top of the deletion queue', metavar='REGEX')
-    parser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='be more verbose, a must when testing something out')
-    parser.add_option('-q', '--quiet', action='store_true', dest='quiet', help='only output warnings')
-    parser.add_option('--check', action='store_true', dest='check', help='report .trashinfo files without a real file')
-    parser.add_option('--dry-run', action='store_true', dest='dryrun', help='just list what would have been done')
-    parser.add_option('--stat', action='store_true', dest='stat', help='show the number, and total size of files involved')
-    parser.add_option('-V', '--version', action='store_true', dest='version', help='show version and exit')
+        days=0,
+        trash_path=None,
+        max_free=0,
+        delete=0,
+        min_free=0,
+        verbose=False,
+        quiet=False,
+        check=False,
+        dryrun=False,
+        stat=False,
+        delete_first=[],
+        version=False,
+    )
+    parser.add_option(
+        '-d', '--days',
+        dest='days', type='int',
+        help='delete files older then DAYS number of days.',
+        metavar='DAYS'
+    )
+    parser.add_option(
+        '-T', '--trash-path',
+        dest='trash_path',
+        help='empty the trash path in the given DIRECTORY instead of using the user home directory',
+        metavar='DIRECTORY'
+    )
+    parser.add_option(
+        '-t', '--trash-mounts',
+        dest='trash_mounts', action='store_true', default=False,
+        help='Process all user trash directories instead of just the one in the home directory'
+    )
+    parser.add_option(
+        '--max-free',
+        dest='max_free', type='int',
+        help='only run if less then M megabytes of free space is left.',
+        metavar='M'
+    )
+    parser.add_option(
+        '--delete', dest='delete', type='int',
+        help='delete at least M megabytes.',
+        metavar='M'
+    )
+    parser.add_option(
+        '--min-free', '--keep-free',
+        dest='min_free', type='int',
+        help='set --delete to make sure M megabytes of space is available.',
+        metavar='M'
+    )
+    parser.add_option(
+        '-D', '--delete-first',
+        action='append', dest='delete_first',
+        help='push files matching this REGEX to the top of the deletion queue',
+        metavar='REGEX'
+    )
+    parser.add_option(
+        '-v', '--verbose',
+        action='store_true', dest='verbose',
+        help='be more verbose, a must when testing something out'
+    )
+    parser.add_option(
+        '-q', '--quiet',
+        action='store_true', dest='quiet',
+        help='only output warnings'
+    )
+    parser.add_option(
+        '--check',
+        action='store_true', dest='check',
+        help='report .trashinfo files without a real file'
+    )
+    parser.add_option(
+        '--dry-run',
+        action='store_true', dest='dryrun',
+        help='just list what would have been done'
+    )
+    parser.add_option(
+        '--stat',
+        action='store_true', dest='stat',
+        help='show the number, and total size of files involved')
+    parser.add_option(
+        '-V', '--version',
+        action='store_true', dest='version',
+        help='show version and exit'
+    )
     (options, args) = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -198,11 +265,20 @@ def main():
         logging.getLogger().setLevel(logging.WARNING)
 
     if options.version:
-        logging.info('''Version 0.2.1\nCopyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\nLicense GPLv3+''')
+        logging.info(
+            'Version ' + __version__ + '\n'
+                                       'Copyright (C) 2008 A. Bram Neijt <bneijt@gmail.com>\n'
+                                       'License GPLv3+'
+        )
         return 1
 
     if options.delete + options.min_free + options.days == 0:
-        parser.error('You need to specify at least one of:\n\t -d <days of age to purge>,\n\t --delete <number of megabytes to purge>, or\n\t --min-free <number of megabytes to make free>\n for this command to have any effect.')
+        parser.error(
+            'You need to specify at least one of:\n'
+            '\t -d <days of age to purge>,\n'
+            '\t --delete <number of megabytes to purge>, or\n'
+            '\t --min-free <number of megabytes to make free>\n'
+            'for this command to have any effect.')
 
     if options.days < 0:
         parser.error('Can not work with a negative or zero days')
@@ -226,11 +302,14 @@ def main():
         parser.error('Specifying both --quiet and --verbose does not make sense')
 
     if options.delete and options.min_free:
-        parser.error('Combining --delete and --min-free results in unpredictable behaviour as --delete may or may not be ignored depending on the free space.')
+        parser.error(
+            'Combining --delete and --min-free results in unpredictable behaviour\n'
+            ' as --delete may or may not be ignored depending on the free space.')
 
     if (not options.min_free) and options.delete_first:
-        parser.error('Using --delete-first (-D) without --min-free does not have any effect. Age based purging will still work as predicted.')
-
+        parser.error(
+            'Using --delete-first (-D) without --min-free does not have any effect.\n'
+            'Age based purging will still work as predicted.')
 
     # Compile list of possible trash directories
     trash_paths = find_trash_directories(options.trash_path, options.trash_mounts)
@@ -242,58 +321,65 @@ def main():
     deleted_files = 0
 
     failures = 0
-    
+
     for trash_path in trash_paths:
         trash_info_path = os.path.expanduser(os.path.join(trash_path, 'info'))
         if not os.path.exists(trash_info_path):
             logging.error('Can not find trash information directory: %s', trash_info_path)
             return 1
 
-        if options.max_free or options.min_free: #Free space calculation is needed
+        if options.max_free or options.min_free:  # Free space calculation is needed
             fs_stat = os.statvfs(trash_info_path)
             if fs_stat.f_bsize <= 0:
-                logging.error('Can not determine free space because the returned filesystem block size was %i\n    The --max-free option may not be supported for this filesystem.' % fs_stat.f_bsize)
+                logging.error(
+                    'Can not determine free space because the returned filesystem block size was %i\n'
+                    'The --max-free option may not be supported for this filesystem.' % fs_stat.f_bsize)
                 return 1
-            free_megabytes = int((fs_stat.f_bavail * fs_stat.f_bsize) / (1024*1024))
+            free_megabytes = int((fs_stat.f_bavail * fs_stat.f_bsize) / (1024 * 1024))
 
             if options.max_free:
-                #Check if there is less then max_free megabytes of free space
-                #if there is not less, then do nothing and skip the glob.
+                # Check if there is less then max_free megabytes of free space
+                # if there is not less, then do nothing and skip the glob.
                 if free_megabytes > options.max_free:
-                    logging.log(VERBOSE, 'I see %i MB of free space at "%s"\n    which is more then --max-free, doing nothing.', free_megabytes, trash_info_path)
+                    logging.log(VERBOSE,
+                                'I see %i MB of free space at "%s"\n'
+                                '\t Which is more then --max-free, doing nothing.',
+                                free_megabytes, trash_info_path)
                     continue
             if options.min_free and free_megabytes < options.min_free:
                 options.delete = options.min_free - free_megabytes
-                logging.log(VERBOSE, 'Setting --delete to %i to make sure at least %i MB becomes free.\n\t Currently we have %i megabytes of free space.', options.delete, options.min_free, free_megabytes)
-
+                logging.log(VERBOSE,
+                            'Setting --delete to %i to make sure at least %i MB becomes free.\n'
+                            '\t Currently we have %i megabytes of free space.',
+                            options.delete, options.min_free, free_megabytes)
 
         deleted_target = 0
         if options.delete:
             deleted_target = options.delete * 1024 * 1024
 
-        #Collect file info's
+        # Collect file info's
         files = []
-        if True: #Scope protection
-            trash_info_file_names = [ os.path.join(trash_info_path, fn) for fn in os.listdir(trash_info_path) if fn.endswith(".trashinfo")]
+        if True:  # Scope protection
+            trash_info_file_names = [os.path.join(trash_info_path, fn) for fn in os.listdir(trash_info_path) if
+                                     fn.endswith(".trashinfo")]
             for file_name in trash_info_file_names:
                 real_file = real_file_name(file_name)
                 file_info = {
                     'trash_info': file_name,
                     'real_file': real_file
-                    }
-                if options.check:
-                    if not os.path.exists(real_file):
-                        logging.warning('%s has no real file associated with it', file_name)
+                }
+                if options.check and not os.path.exists(real_file):
+                    logging.warning('%s has no real file associated with it', file_name)
 
                 file_time = trash_info_date(file_name)
                 if not file_time:
-                    #This happens when a trashinfo file is corrupted (issue #9)
+                    # This happens when a trashinfo file is corrupted (issue #9)
                     logging.warning("Failed to read trash info for real file: %s", file_info['real_file'])
                     failures += 1
                     continue
                 file_info['time'] = time.mktime(file_time)
                 file_info['age_seconds'] = time.time() - file_info['time']
-                file_info['age_days'] = int(math.floor(file_info['age_seconds']/(3600.0 * 24.0)))
+                file_info['age_days'] = int(math.floor(file_info['age_seconds'] / (3600.0 * 24.0)))
 
                 if options.stat or options.delete:
                     # calculating file size is relatively expensive; only do it if needed
@@ -306,27 +392,27 @@ def main():
 
                 logging.log(VERBOSE, 'File %s', real_file)
                 logging.log(VERBOSE, '    is %d days old, %d seconds, so it should %sbe removed',
-                        file_info['age_days'],
-                        file_info['age_seconds'],
-                        ['not ',''][int(file_info['age_days'] > options.days)])
+                            file_info['age_days'],
+                            file_info['age_seconds'],
+                            ['not ', ''][int(file_info['age_days'] > options.days)])
                 logging.log(VERBOSE, '    deletion date was %s', time.strftime('%c', file_time))
                 if options.stat:
                     logging.log(VERBOSE, '    consumes %s', fmt_bytes(file_info['size']))
 
                 files.append(file_info)
 
-        #Kill sorting: first will get purged first if --delete is enabled
-        files.sort(key = lambda x: x['time'], reverse=True)
+        # Kill sorting: first will get purged first if --delete is enabled
+        files.sort(key=lambda x: x['time'], reverse=True)
 
-
-        #Push priority files (delete_first) to the top of the queue
+        # Push priority files (delete_first) to the top of the queue
         for pattern in reversed(options.delete_first):
             r = re.compile(pattern)
             moved_count = 0
             for i in range(len(files)):
-                if r.match(os.path.basename(files[i]['real_file'])) != None:
+                if r.match(os.path.basename(files[i]['real_file'])) is not None:
                     file_info = files.pop(i)
-                    logging.log(VERBOSE, 'Pushing %s to top of queue because it matches %s', os.path.basename(file_info['real_file']), pattern )
+                    logging.log(VERBOSE, 'Pushing %s to top of queue because it matches %s',
+                                os.path.basename(file_info['real_file']), pattern)
                     files.insert(moved_count, file_info)
                     moved_count += 1
 
@@ -346,7 +432,7 @@ def main():
         logging.info('  %6d entries at start (%s)', total_files, fmt_bytes(total_size))
         logging.info(' -%6d deleted (%s)', deleted_files, fmt_bytes(deleted_size))
         logging.info(' =%6d remaining (%s)', (total_files - deleted_files), fmt_bytes(total_size - deleted_size))
-    return (0 if failures == 0 else 1)
+    return 0 if failures == 0 else 1
 
 
 if __name__ == '__main__':
