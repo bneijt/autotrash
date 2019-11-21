@@ -1,4 +1,0 @@
-arrow>=0.14
-
-[testing]
-pytest
