@@ -2,11 +2,12 @@ language: python
 
 python:
     - "3.5"
+    - "3.7"
 
 install:
-    - pip install .
+    - pipenv update --dev
 
 script:
-    - nosetests
-    - autotrash --help
+    - pipenv run -- pytest
+    - pipenv run -- autotrash --help
 
