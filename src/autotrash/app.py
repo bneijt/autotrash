@@ -158,7 +158,7 @@ def find_trash_directories(override_dir=None, find_mounts=False):
 
     return trash_paths
 
-def main(args):
+def main():
     #Load and set configuration options
     parser = optparse.OptionParser(usage='%prog -d <days of age to purge>')
     parser.set_defaults(
@@ -348,5 +348,6 @@ def main(args):
         logging.info(' =%6d remaining (%s)', (total_files - deleted_files), fmt_bytes(total_size - deleted_size))
     return (0 if failures == 0 else 1)
 
+
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    sys.exit(main())
