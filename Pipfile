@@ -1,2 +1,3 @@
 [packages]
-autotrash = {path = ".", editable = true, extras = ["testing"]}
+autotrash = {path = ".",editable = true,extras = ["testing"]}
+twine = "*"
