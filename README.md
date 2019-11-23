@@ -45,7 +45,7 @@ Add the program with the "+ Add" button.
 
 This will make sure that your trash is cleaned up every time you log in.
 
-Homepage: http://www.logfish.net/pr/autotrash/
+Homepage: https://github.com/bneijt/autotrash
 
 Autotrash is now in the stable repo for Fedora 20 and is going to be synced out on the mirrors also for Fedora 21.
 Epel7 package is still in the testing repo but should go stable within few days.
