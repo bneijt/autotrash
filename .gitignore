@@ -4,3 +4,6 @@
 /virtualenv
 /doc/autotrash.1
 *.pyc
+/.idea
+.eggs
+*.egg-info
