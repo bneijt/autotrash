@@ -58,7 +58,7 @@ def on_remove_error(function, path, excinfo):
     logging.error('Failed to remove "%s", got exception: %s', path, str(excinfo))
 
 
-def real_file_name(trash_name):
+def real_file_name(trash_name: str) -> str:
     """Get real file name from trashinfo file name: basename without extension in ../files"""
     basename = os.path.basename(trash_name)
     trash_directory = os.path.abspath(os.path.join(os.path.dirname(trash_name), '..'))
@@ -110,7 +110,7 @@ def read_datetime(value: str) -> datetime.datetime:
     raise failure
 
 
-def trash_info_date(fname) -> Union[datetime.datetime, None]:
+def trash_info_date(fname: str) -> Union[datetime.datetime, None]:
     try:
         parser = configparser.ConfigParser()
         read_correctly = parser.read(fname)
@@ -125,7 +125,7 @@ def trash_info_date(fname) -> Union[datetime.datetime, None]:
     return None
 
 
-def get_consumed_size(path):
+def get_consumed_size(path: str) -> int:
     """Get the amount of filesystem space actually consumed by a file or directory"""
     size = 0
     try:
@@ -141,7 +141,7 @@ def get_consumed_size(path):
     return size
 
 
-def fmt_bytes(num_bytes, fmt='%.1f'):
+def fmt_bytes(num_bytes: int, fmt: str = '%.1f') -> str:
     # If you NEED EiB, ZiB or YiB, please send me a mail I would love to hear from you!
     for size, name in (1 << 50, 'PiB'), (1 << 40, 'TiB'), (1 << 30, 'GiB'), (1 << 20, 'MiB'), (1 << 10, 'KiB'):
         if num_bytes >= size:
@@ -180,7 +180,7 @@ def find_trash_directories(override_dir=None, find_mounts=False):
     return trash_paths
 
 
-def configure_logging(options):
+def configure_logging(options) -> None:
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     logging.addLevelName(VERBOSE, 'VERBOSE')
     if options.verbose:

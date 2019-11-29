@@ -24,3 +24,10 @@ def should_survive_config_with_zeros():
 def should_read_datetime_for_all_known_formats():
     assert autotrash.read_datetime('2019-10-17T15:33:57') == datetime.datetime(2019, 10, 17, 15, 33, 57)
     assert autotrash.read_datetime('2019-10-17T15:33:57.710Z') == datetime.datetime(2019, 10, 17, 15, 33, 57, 710000)
+
+
+def should_format_bytes_nicely():
+    assert autotrash.fmt_bytes(10) == "10 bytes"
+    assert autotrash.fmt_bytes(1024) == "1.0 KiB"
+    assert autotrash.fmt_bytes(1024 * 1024) == "1.0 MiB"
+    assert autotrash.fmt_bytes(1024 * 1024 + 512 * 1024) == "1.5 MiB"
