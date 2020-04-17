@@ -8,10 +8,13 @@ jobs:
     executor: python/default
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - 'pipenv-{{ checksum "Pipfile.lock"  }}'
       - run:
           command: |
             pip install pipenv
-            pipenv sync
+            pipenv sync --dev
           name: Sync pipenv
       - run:
           command: pipenv run pytest
