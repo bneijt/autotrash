@@ -52,3 +52,22 @@ Epel7 package is still in the testing repo but should go stable within few days.
 
 You can install the package on Fedora right now with:
 yum install autotrash
+
+Development
+===========
+
+The `autotrash` command is created as an entryscript by setuptools, so you can't directly run autotrash from the module at the moment. The main implementation is in `src/app.py` so the following will work:
+
+    PYTHONPATH=src python3 -m autotrash.app --help
+
+Since Python 2 is end of life, I have decided to nolonger support that and I'm using type annotations throughout the code. This will cause an attempt to run autotrash code in [Python 2 to give syntax errors](https://github.com/bneijt/autotrash/issues/19).
+
+Using `pipenv` you can easily enter a shell where `autotrash` is installed:
+
+    pipenv shell
+    autotrash --help
+
+or directly with
+
+    pipenv run autotrash --help
+
