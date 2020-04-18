@@ -16,6 +16,7 @@ def new_parser() -> optparse.OptionParser:
         stat=False,
         delete_first=[],
         version=False,
+        trash_limit=0,
     )
     parser.add_option(
         '-d', '--days',
@@ -49,6 +50,12 @@ def new_parser() -> optparse.OptionParser:
         '--min-free', '--keep-free',
         dest='min_free', type='int',
         help='set --delete to make sure M megabytes of space is available.',
+        metavar='M'
+    )
+    parser.add_option(
+        '--trash_limit',
+        dest='trash_limit', type='int',
+        help='make sure no more than M megabytes of space are used by the trash.',
         metavar='M'
     )
     parser.add_option(
@@ -110,6 +117,9 @@ def check_options(parser, options) -> None:
     if options.min_free < 0:
         parser.error('Can not work with a negative value for --min-free')
 
+    if options.trash_limit < 0:
+        parser.error('Can not work with a negative value for --trash_limit')
+
     if options.trash_path and options.trash_mounts:
         parser.error('Cannot auto-detect trash directories when setting a specific one')
 
@@ -121,8 +131,13 @@ def check_options(parser, options) -> None:
 
     if options.delete and options.min_free:
         parser.error(
-            'Combining --delete and --min-free results in unpredictable behaviour\n'
+            'Combining --delete and --min-free results in unpredictable behavior\n'
             ' as --delete may or may not be ignored depending on the free space.')
+
+    if options.trash_limit and (options.delete or options.min_free):
+        parser.error(
+            'Combining --trash_limit with --min-free or --delete is unsupported\n'
+            'as these rules may contradict each other.')
 
     if (not options.min_free) and options.delete_first:
         parser.error(

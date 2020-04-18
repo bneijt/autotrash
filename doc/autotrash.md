@@ -61,6 +61,10 @@ This program follows the usual GNU command line syntax, with long options  start
     --delete to the difference between _M_ and the amount of free space. If  unsure,  try  running
     autotrash with --dry-run and --verbose to see the effect.
 
+--trash_limit _M_
+:   Make sure the trash doesn't consume more than _M_ megabytes. If more space is consumed, set
+    --delete to the difference between _M_ and the amount of space consumed by the trash.
+
 -D _REGEX_ --delete-first _REGEX_
 :   Purge  any  file  which  matches _REGEX_ first, regardless of it's time-stamp. REGEX must be a
     valid regular expression. If this option is used multiple  times,  the  files  matching  the
@@ -118,6 +122,9 @@ autotrash --max-free 4000 --min-free 2048 -d 30
 :   Start  reading  the  trash if there is less than 4000MB of free space, then start keeping an
     eye on it. At that point, remove files older than 30 days and if there is less than 2GB of free
     space after that remove even newer files.
+
+autotrash --trash_limit 200 -d 30
+:   Remove files older than 30 days. If trash consumes more than 200MB, remove even newer files.
 
 @hourly /usr/bin/autotrash --max-free 4000 --min-free 2048 -d 30
 :   Experienced  users should consider adding autotrash as a crontab entry, using **crontab -e** and
