@@ -131,7 +131,7 @@ def check_options(parser, options) -> None:
 
     if options.delete and options.min_free:
         parser.error(
-            'Combining --delete and --min-free results in unpredictable behavior\n'
+            'Combining --delete and --min-free results in unpredictable behaviour\n'
             ' as --delete may or may not be ignored depending on the free space.')
 
     if options.trash_limit and (options.delete or options.min_free):
