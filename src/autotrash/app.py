@@ -35,6 +35,13 @@ from .options import new_parser, check_options
 VERBOSE = 15
 
 
+class StatsClass:
+    total_size = 0
+    total_files = 0
+    deleted_size = 0
+    deleted_files = 0
+    failures = 0
+
 def on_remove_error(function, path, excinfo):
     if excinfo[0] == errno.EPERM:
         # Permission errors, try a chmod to recover
@@ -188,6 +195,120 @@ def configure_logging(options) -> None:
     elif options.quiet:
         logging.getLogger().setLevel(logging.WARNING)
 
+def get_fs_stat(trash_info_path):
+    return os.statvfs(trash_info_path)
+
+def get_file_names(trash_info_path):
+    return [os.path.join(trash_info_path, fn) for fn in os.listdir(trash_info_path) if
+            fn.endswith(".trashinfo")]
+
+def get_cur_time():
+    return datetime.datetime.now().timestamp()
+
+class OsAccess:
+    get_file_names = get_file_names
+
+def process_path(trash_info_path, options, stats, os_access) -> int:
+    if options.max_free or options.min_free:  # Free space calculation is needed
+        fs_stat = get_fs_stat(trash_info_path)
+        if fs_stat.f_bsize <= 0:
+            logging.error(
+                'Can not determine free space because the returned filesystem block size was %i\n'
+                'The --max-free option may not be supported for this filesystem.' % fs_stat.f_bsize)
+            return 1
+        free_megabytes = int((fs_stat.f_bavail * fs_stat.f_bsize) / (1024 * 1024))
+
+        if options.max_free:
+            # Check if there is less then max_free megabytes of free space
+            # if there is not less, then do nothing and skip the glob.
+            if free_megabytes > options.max_free:
+                logging.log(VERBOSE,
+                            'I see %i MB of free space at "%s"\n'
+                            '\t Which is more then --max-free, doing nothing.',
+                            free_megabytes, trash_info_path)
+                return 0
+        if options.min_free and free_megabytes < options.min_free:
+            options.delete = options.min_free - free_megabytes
+            logging.log(VERBOSE,
+                        'Setting --delete to %i to make sure at least %i MB becomes free.\n'
+                        '\t Currently we have %i megabytes of free space.',
+                        options.delete, options.min_free, free_megabytes)
+
+    deleted_target = 0
+    if options.delete:
+        deleted_target = options.delete * 1024 * 1024
+
+    # Collect file info's
+    files = []
+    if True:  # Scope protection
+        trash_info_file_names = os_access.get_file_names(trash_info_path)
+        for file_name in trash_info_file_names:
+            real_file = real_file_name(file_name)
+            file_info = {
+                'trash_info': file_name,
+                'real_file': real_file
+            }
+            if options.check and not os.path.exists(real_file):
+                logging.warning('%s has no real file associated with it', file_name)
+
+            file_time = trash_info_date(file_name)
+            if not file_time:
+                # This happens when a trashinfo file is corrupted (issue #9)
+                logging.warning("Failed to read trash info for real file: %s", file_info['real_file'])
+                stats.failures += 1
+                return 0
+            file_info['time'] = file_time.timestamp()
+            file_info['age_seconds'] = get_cur_time() - file_info['time']
+            file_info['age_days'] = int(math.floor(file_info['age_seconds'] / (3600.0 * 24.0)))
+
+            if options.stat or options.delete:
+                # calculating file size is relatively expensive; only do it if needed
+                file_size = get_consumed_size(file_name)
+                if os.path.exists(real_file):
+                    if os.path.isdir(real_file):
+                        logging.log(VERBOSE, 'Calculating size of directory %s (may take a long time)', real_file)
+                    file_size += get_consumed_size(real_file)
+                file_info['size'] = file_size
+
+            logging.log(VERBOSE, 'File %s', real_file)
+            logging.log(VERBOSE, '    is %d days old, %d seconds, so it should %sbe removed',
+                        file_info['age_days'],
+                        file_info['age_seconds'],
+                        ['not ', ''][int(file_info['age_days'] > options.days)])
+            logging.log(VERBOSE, '    deletion date was %s', file_time.isoformat())
+            if options.stat:
+                logging.log(VERBOSE, '    consumes %s', fmt_bytes(file_info['size']))
+
+            files.append(file_info)
+
+    # Kill sorting: first will get purged first if --delete is enabled
+    files.sort(key=lambda x: x['time'], reverse=True)
+
+    # Push priority files (delete_first) to the top of the queue
+    for pattern in reversed(options.delete_first):
+        r = re.compile(pattern)
+        moved_count = 0
+        for i in range(len(files)):
+            if r.match(os.path.basename(files[i]['real_file'])) is not None:
+                file_info = files.pop(i)
+                logging.log(VERBOSE, 'Pushing %s to top of queue because it matches %s',
+                            os.path.basename(file_info['real_file']), pattern)
+                files.insert(moved_count, file_info)
+                moved_count += 1
+
+    for file_info in files:
+        if options.stat:
+            stats.total_size += file_info['size']
+            stats.total_files += 1
+
+        if (options.days and file_info['age_days'] > options.days) or stats.deleted_size < deleted_target:
+            purge(options.trash_path, file_info['trash_info'], options.dryrun)
+            if deleted_target or options.stat:
+                stats.deleted_size += file_info['size']
+                stats.deleted_files += 1
+
+    return 0
+
 
 def main():
     # Load and set configuration options
@@ -211,12 +332,7 @@ def main():
     trash_paths = find_trash_directories(options.trash_path, options.trash_mounts)
 
     # Set variables for stats collecting
-    total_size = 0
-    total_files = 0
-    deleted_size = 0
-    deleted_files = 0
-
-    failures = 0
+    stats = StatsClass()
 
     for trash_path in trash_paths:
         trash_info_path = os.path.expanduser(os.path.join(trash_path, 'info'))
@@ -224,111 +340,15 @@ def main():
             logging.error('Can not find trash information directory: %s', trash_info_path)
             return 1
 
-        if options.max_free or options.min_free:  # Free space calculation is needed
-            fs_stat = os.statvfs(trash_info_path)
-            if fs_stat.f_bsize <= 0:
-                logging.error(
-                    'Can not determine free space because the returned filesystem block size was %i\n'
-                    'The --max-free option may not be supported for this filesystem.' % fs_stat.f_bsize)
-                return 1
-            free_megabytes = int((fs_stat.f_bavail * fs_stat.f_bsize) / (1024 * 1024))
-
-            if options.max_free:
-                # Check if there is less then max_free megabytes of free space
-                # if there is not less, then do nothing and skip the glob.
-                if free_megabytes > options.max_free:
-                    logging.log(VERBOSE,
-                                'I see %i MB of free space at "%s"\n'
-                                '\t Which is more then --max-free, doing nothing.',
-                                free_megabytes, trash_info_path)
-                    continue
-            if options.min_free and free_megabytes < options.min_free:
-                options.delete = options.min_free - free_megabytes
-                logging.log(VERBOSE,
-                            'Setting --delete to %i to make sure at least %i MB becomes free.\n'
-                            '\t Currently we have %i megabytes of free space.',
-                            options.delete, options.min_free, free_megabytes)
-
-        deleted_target = 0
-        if options.delete:
-            deleted_target = options.delete * 1024 * 1024
-
-        # Collect file info's
-        files = []
-        if True:  # Scope protection
-            trash_info_file_names = [os.path.join(trash_info_path, fn) for fn in os.listdir(trash_info_path) if
-                                     fn.endswith(".trashinfo")]
-            for file_name in trash_info_file_names:
-                real_file = real_file_name(file_name)
-                file_info = {
-                    'trash_info': file_name,
-                    'real_file': real_file
-                }
-                if options.check and not os.path.exists(real_file):
-                    logging.warning('%s has no real file associated with it', file_name)
-
-                file_time = trash_info_date(file_name)
-                if not file_time:
-                    # This happens when a trashinfo file is corrupted (issue #9)
-                    logging.warning("Failed to read trash info for real file: %s", file_info['real_file'])
-                    failures += 1
-                    continue
-                file_info['time'] = file_time.timestamp()
-                file_info['age_seconds'] = datetime.datetime.now().timestamp() - file_info['time']
-                file_info['age_days'] = int(math.floor(file_info['age_seconds'] / (3600.0 * 24.0)))
-
-                if options.stat or options.delete:
-                    # calculating file size is relatively expensive; only do it if needed
-                    file_size = get_consumed_size(file_name)
-                    if os.path.exists(real_file):
-                        if os.path.isdir(real_file):
-                            logging.log(VERBOSE, 'Calculating size of directory %s (may take a long time)', real_file)
-                        file_size += get_consumed_size(real_file)
-                    file_info['size'] = file_size
-
-                logging.log(VERBOSE, 'File %s', real_file)
-                logging.log(VERBOSE, '    is %d days old, %d seconds, so it should %sbe removed',
-                            file_info['age_days'],
-                            file_info['age_seconds'],
-                            ['not ', ''][int(file_info['age_days'] > options.days)])
-                logging.log(VERBOSE, '    deletion date was %s', file_time.isoformat())
-                if options.stat:
-                    logging.log(VERBOSE, '    consumes %s', fmt_bytes(file_info['size']))
-
-                files.append(file_info)
-
-        # Kill sorting: first will get purged first if --delete is enabled
-        files.sort(key=lambda x: x['time'], reverse=True)
-
-        # Push priority files (delete_first) to the top of the queue
-        for pattern in reversed(options.delete_first):
-            r = re.compile(pattern)
-            moved_count = 0
-            for i in range(len(files)):
-                if r.match(os.path.basename(files[i]['real_file'])) is not None:
-                    file_info = files.pop(i)
-                    logging.log(VERBOSE, 'Pushing %s to top of queue because it matches %s',
-                                os.path.basename(file_info['real_file']), pattern)
-                    files.insert(moved_count, file_info)
-                    moved_count += 1
-
-        for file_info in files:
-            if options.stat:
-                total_size += file_info['size']
-                total_files += 1
-
-            if (options.days and file_info['age_days'] > options.days) or deleted_size < deleted_target:
-                purge(options.trash_path, file_info['trash_info'], options.dryrun)
-                if deleted_target or options.stat:
-                    deleted_size += file_info['size']
-                    deleted_files += 1
+        if process_path(trash_info_path, options, stats, OsAccess()):
+            return 1
 
     if options.stat:
         logging.info('Trash statistics:')
-        logging.info('  %6d entries at start (%s)', total_files, fmt_bytes(total_size))
-        logging.info(' -%6d deleted (%s)', deleted_files, fmt_bytes(deleted_size))
-        logging.info(' =%6d remaining (%s)', (total_files - deleted_files), fmt_bytes(total_size - deleted_size))
-    return 0 if failures == 0 else 1
+        logging.info('  %6d entries at start (%s)', stats.total_files, fmt_bytes(stats.total_size))
+        logging.info(' -%6d deleted (%s)', stats.deleted_files, fmt_bytes(stats.deleted_size))
+        logging.info(' =%6d remaining (%s)', (stats.total_files - stats.deleted_files), fmt_bytes(stats.total_size - stats.deleted_size))
+    return 0 if stats.failures == 0 else 1
 
 
 if __name__ == '__main__':
