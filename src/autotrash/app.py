@@ -323,7 +323,7 @@ def main():
                     deleted_size += file_info['size']
                     deleted_files += 1
             elif options.verbose:
-                logging.log(VERBOSE, 'keep %s', real_file_name(file_info['trash_info']))
+                logging.log(VERBOSE, 'Keeping %s', real_file_name(file_info['trash_info']))
 
     if options.stat:
         logging.info('Trash statistics:')
