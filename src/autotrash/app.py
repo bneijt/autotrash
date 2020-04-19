@@ -298,7 +298,7 @@ def main():
                 files.append(file_info)
 
         # Kill sorting: first will get purged first if --delete is enabled
-        files.sort(key=lambda x: x['time'], reverse=True)
+        files.sort(key=lambda x: x['age_seconds'], reverse=True)
 
         # Push priority files (delete_first) to the top of the queue
         for pattern in reversed(options.delete_first):
@@ -322,6 +322,8 @@ def main():
                 if deleted_target or options.stat:
                     deleted_size += file_info['size']
                     deleted_files += 1
+            elif options.verbose:
+                logging.log(VERBOSE, 'keep %s', real_file_name(file_info['trash_info']))
 
     if options.stat:
         logging.info('Trash statistics:')
