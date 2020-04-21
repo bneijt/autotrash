@@ -117,7 +117,7 @@ def read_datetime(value: str) -> datetime.datetime:
     raise failure
 
 
-def trash_info_date(fname: str) -> Union[datetime.datetime, None]:
+def get_trash_info_date(fname: str) -> Union[datetime.datetime, None]:
     try:
         parser = configparser.ConfigParser()
         read_correctly = parser.read(fname)
@@ -207,10 +207,16 @@ def get_cur_time():
 
 class OsAccess:
     get_file_names = get_file_names
+    get_cur_time = get_cur_time
+    get_fs_stat = get_fs_stat
+    get_consumed_size = get_consumed_size
+    get_trash_info_date = get_trash_info_date
+    purge = purge
+
 
 def process_path(trash_info_path, options, stats, os_access) -> int:
     if options.max_free or options.min_free:  # Free space calculation is needed
-        fs_stat = get_fs_stat(trash_info_path)
+        fs_stat = os_access.get_fs_stat(trash_info_path)
         if fs_stat.f_bsize <= 0:
             logging.error(
                 'Can not determine free space because the returned filesystem block size was %i\n'
@@ -251,23 +257,23 @@ def process_path(trash_info_path, options, stats, os_access) -> int:
             if options.check and not os.path.exists(real_file):
                 logging.warning('%s has no real file associated with it', file_name)
 
-            file_time = trash_info_date(file_name)
+            file_time = os_access.get_trash_info_date(file_name)
             if not file_time:
                 # This happens when a trashinfo file is corrupted (issue #9)
                 logging.warning("Failed to read trash info for real file: %s", file_info['real_file'])
                 stats.failures += 1
                 return 0
             file_info['time'] = file_time.timestamp()
-            file_info['age_seconds'] = get_cur_time() - file_info['time']
+            file_info['age_seconds'] = os_access.get_cur_time() - file_info['time']
             file_info['age_days'] = int(math.floor(file_info['age_seconds'] / (3600.0 * 24.0)))
 
             if options.stat or options.delete:
                 # calculating file size is relatively expensive; only do it if needed
-                file_size = get_consumed_size(file_name)
+                file_size = os_access.get_consumed_size(file_name)
                 if os.path.exists(real_file):
                     if os.path.isdir(real_file):
                         logging.log(VERBOSE, 'Calculating size of directory %s (may take a long time)', real_file)
-                    file_size += get_consumed_size(real_file)
+                    file_size += os_access.get_consumed_size(real_file)
                 file_info['size'] = file_size
 
             logging.log(VERBOSE, 'File %s', real_file)
@@ -302,7 +308,7 @@ def process_path(trash_info_path, options, stats, os_access) -> int:
             stats.total_files += 1
 
         if (options.days and file_info['age_days'] > options.days) or stats.deleted_size < deleted_target:
-            purge(options.trash_path, file_info['trash_info'], options.dryrun)
+            os_access.purge(options.trash_path, file_info['trash_info'], options.dryrun)
             if deleted_target or options.stat:
                 stats.deleted_size += file_info['size']
                 stats.deleted_files += 1
