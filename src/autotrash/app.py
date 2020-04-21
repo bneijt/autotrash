@@ -288,7 +288,7 @@ def process_path(trash_info_path, options, stats, os_access) -> int:
             files.append(file_info)
 
     # Kill sorting: first will get purged first if --delete is enabled
-    files.sort(key=lambda x: x['time'], reverse=True)
+    files.sort(key=lambda x: x['age_seconds'], reverse=True)
 
     # Push priority files (delete_first) to the top of the queue
     for pattern in reversed(options.delete_first):
@@ -312,6 +312,8 @@ def process_path(trash_info_path, options, stats, os_access) -> int:
             if deleted_target or options.stat:
                 stats.deleted_size += file_info['size']
                 stats.deleted_files += 1
+        elif options.verbose:
+            logging.log(VERBOSE, 'Keeping %s', real_file_name(file_info['trash_info']))
 
     return 0
 
