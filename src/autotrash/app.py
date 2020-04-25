@@ -206,12 +206,12 @@ def get_cur_time():
     return datetime.datetime.now().timestamp()
 
 class OsAccess:
-    get_file_names = get_file_names
-    get_cur_time = get_cur_time
-    get_fs_stat = get_fs_stat
-    get_consumed_size = get_consumed_size
-    get_trash_info_date = get_trash_info_date
-    purge = purge
+    get_file_names = None
+    get_cur_time = None
+    get_fs_stat = None
+    get_consumed_size = None
+    get_trash_info_date = None
+    purge = None
 
 
 def process_path(trash_info_path, options, stats, os_access) -> int:
@@ -342,13 +342,21 @@ def main():
     # Set variables for stats collecting
     stats = StatsClass()
 
+    os_access = OsAccess()
+    os_access.get_file_names = get_file_names
+    os_access.get_cur_time = get_cur_time
+    os_access.get_fs_stat = get_fs_stat
+    os_access.get_consumed_size = get_consumed_size
+    os_access.get_trash_info_date = get_trash_info_date
+    os_access.purge = purge
+
     for trash_path in trash_paths:
         trash_info_path = os.path.expanduser(os.path.join(trash_path, 'info'))
         if not os.path.exists(trash_info_path):
             logging.error('Can not find trash information directory: %s', trash_info_path)
             return 1
 
-        if process_path(trash_info_path, options, stats, OsAccess()):
+        if process_path(trash_info_path, options, stats, os_access):
             return 1
 
     if options.stat:
