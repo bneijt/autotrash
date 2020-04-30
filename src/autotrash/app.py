@@ -339,6 +339,8 @@ def main():
     # Compile list of possible trash directories
     trash_paths = find_trash_directories(options.trash_path, options.trash_mounts)
 
+    trash_total_size = 0
+
     # Set variables for stats collecting
     stats = StatsClass()
 
