@@ -22,6 +22,7 @@ class OptionsClass:
     stat=False
     delete_first=[]
     version=False
+    trash_limit=0
 
 def mock_get_file_names(trash_info_path):
     keys = list(file_info_map.keys())
@@ -123,6 +124,29 @@ def test_deleted_with_min_free():
     options.days = 5
     options.min_free = mock_free_space_mb + 6
     expected_deleted = ["e", "f", "g"]
+    run_end_to_end(options, expected_deleted)
+
+# test --min-free doesn't delete when there is enough free space
+def test_nothing_deleted_with_min_free():
+    options = OptionsClass()
+    options.days = 5
+    options.min_free = mock_free_space_mb - 1
+    expected_deleted = []
+    run_end_to_end(options, expected_deleted)
+
+# test --trash-limit
+def test_deleted_with_trash_limit():
+    options = OptionsClass()
+    options.days = 5
+    options.trash_limit = 4
+    expected_deleted = ["d", "e", "f", "g"]
+    run_end_to_end(options, expected_deleted)
+
+def test_nothing_deleted_with_trash_limit():
+    options = OptionsClass()
+    options.days = 5
+    options.trash_limit = 20
+    expected_deleted = []
     run_end_to_end(options, expected_deleted)
 
 # -------- original tests ----------
