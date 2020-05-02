@@ -14,11 +14,9 @@ Installation
 
 On Fedora consider using `yum install autotrash`
 
-On Arch Linux use [the autotrash package in AUR](https://aur.archlinux.org/packages/autotrash/)
-
 [On Ubuntu](http://packages.ubuntu.com/trusty/autotrash) and [Debian](https://packages.debian.org/search?keywords=autotrash&searchon=names&suite=stable&section=all) try to install it using `apt-get install autotrash`.
 
-Last option is to copy the autotrash file from a release to any location on your PATH, for example `/usr/bin/`.
+Last option is to install autotrash using pip, for example, using: `pip install --user autotrash`
 
 
 Configuration
@@ -51,7 +49,8 @@ Autotrash is now in the stable repo for Fedora 20 and is going to be synced out 
 Epel7 package is still in the testing repo but should go stable within few days.
 
 You can install the package on Fedora right now with:
-yum install autotrash
+
+    yum install autotrash
 
 Development
 ===========
