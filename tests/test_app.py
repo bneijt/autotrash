@@ -134,7 +134,7 @@ def test_nothing_deleted_with_min_free():
     expected_deleted = []
     run_end_to_end(options, expected_deleted)
 
-# test --trash-limit
+# test files deleted due to --trash-limit
 def test_deleted_with_trash_limit():
     options = OptionsClass()
     options.days = 5
@@ -142,6 +142,7 @@ def test_deleted_with_trash_limit():
     expected_deleted = ["d", "e", "f", "g"]
     run_end_to_end(options, expected_deleted)
 
+# test --trash-limit doesn't delete when the trash is not occupied enough
 def test_nothing_deleted_with_trash_limit():
     options = OptionsClass()
     options.days = 5
