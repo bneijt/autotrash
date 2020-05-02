@@ -244,6 +244,8 @@ def process_path(trash_info_path, options, stats, os_access) -> int:
     if options.delete:
         deleted_target = options.delete * 1024 * 1024
 
+    trash_total_size = 0
+
     # Collect file info's
     files = []
     if True:  # Scope protection
@@ -267,7 +269,7 @@ def process_path(trash_info_path, options, stats, os_access) -> int:
             file_info['age_seconds'] = os_access.get_cur_time() - file_info['time']
             file_info['age_days'] = int(math.floor(file_info['age_seconds'] / (3600.0 * 24.0)))
 
-            if options.stat or options.delete:
+            if options.stat or options.delete or options.trash_limit:
                 # calculating file size is relatively expensive; only do it if needed
                 file_size = os_access.get_consumed_size(file_name)
                 if os.path.exists(real_file):
@@ -275,6 +277,7 @@ def process_path(trash_info_path, options, stats, os_access) -> int:
                         logging.log(VERBOSE, 'Calculating size of directory %s (may take a long time)', real_file)
                     file_size += os_access.get_consumed_size(real_file)
                 file_info['size'] = file_size
+                trash_total_size += file_size
 
             logging.log(VERBOSE, 'File %s', real_file)
             logging.log(VERBOSE, '    is %d days old, %d seconds, so it should %sbe removed',
@@ -286,6 +289,19 @@ def process_path(trash_info_path, options, stats, os_access) -> int:
                 logging.log(VERBOSE, '    consumes %s', fmt_bytes(file_info['size']))
 
             files.append(file_info)
+
+    if options.trash_limit:
+        trash_limit_bytes = options.trash_limit * 1024 * 1024
+        if deleted_target:
+            logging.error('Cannot mix \'--trash_limit\' with \'--delete\'')
+            return 1
+
+        logging.log(VERBOSE, 'Total trash size is %s', fmt_bytes(trash_total_size))
+        logging.log(VERBOSE, 'Trash size limit is %s', fmt_bytes(trash_limit_bytes))
+
+        if trash_limit_bytes < trash_total_size:
+            deleted_target = trash_total_size - trash_limit_bytes
+            logging.log(VERBOSE, 'Trash exceeds limit by %s', fmt_bytes(deleted_target))
 
     # Kill sorting: first will get purged first if --delete is enabled
     files.sort(key=lambda x: x['age_seconds'], reverse=True)
@@ -338,8 +354,6 @@ def main():
 
     # Compile list of possible trash directories
     trash_paths = find_trash_directories(options.trash_path, options.trash_mounts)
-
-    trash_total_size = 0
 
     # Set variables for stats collecting
     stats = StatsClass()
