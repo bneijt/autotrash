@@ -27,6 +27,7 @@ import sys
 import datetime
 import tempfile
 import subprocess
+import getpass
 from typing import Union
 
 import math
@@ -350,8 +351,6 @@ def install_service(options, args):
         logging.error('autotrash not found in the path')
 
     args = subprocess.list2cmdline([arg for arg in sys.argv[1:] if arg != '--install'])
-    # overriding XDG_DATA_HOME because root may not have a trash information directory
-    xdg_data_home = os.getenv('XDG_DATA_HOME', os.path.expanduser('~/.local/share'))
 
     timer_file = '''\
 [Unit]
@@ -371,7 +370,7 @@ Description=Empty trash
 
 [Service]
 Type=oneshot
-Environment="XDG_DATA_HOME={xdg_data_home}"
+User={getpass.getuser()}
 ExecStart="{executable_path}" {args}
 '''
 
