@@ -93,6 +93,11 @@ def new_parser() -> optparse.OptionParser:
         action='store_true', dest='version',
         help='show version and exit'
     )
+    parser.add_option(
+        '--install',
+        action='store_true', dest='install',
+        help='set autotrash to run automatically with the given options'
+    )
     return parser
 
 

@@ -25,11 +25,13 @@ import shutil
 import stat
 import sys
 import datetime
+import tempfile
+import subprocess
 from typing import Union
 
 import math
 from autotrash import __version__
-from .options import new_parser, check_options
+from autotrash.options import new_parser, check_options
 
 # custom logging level between DEBUG and INFO
 VERBOSE = 15
@@ -334,6 +336,67 @@ def process_path(trash_info_path, options, stats, os_access) -> int:
     return 0
 
 
+def install_service(options, args):
+    if shutil.which('systemctl') is None:
+        logging.error('system must support systemd to use --install')
+        return
+
+    if options.dryrun:
+        logging.error('cannot install with --dry-run enabled')
+        return
+
+    executable_path = shutil.which('autotrash')
+    if executable_path is None:
+        logging.error('autotrash not found in the path')
+
+    args = subprocess.list2cmdline([arg for arg in sys.argv[1:] if arg != '--install'])
+    # overriding XDG_DATA_HOME because root may not have a trash information directory
+    xdg_data_home = os.getenv('XDG_DATA_HOME', os.path.expanduser('~/.local/share'))
+
+    timer_file = '''\
+[Unit]
+Description=Empty trash
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+'''
+
+    service_file = f'''\
+[Unit]
+Description=Empty trash
+
+[Service]
+Type=oneshot
+Environment="XDG_DATA_HOME={xdg_data_home}"
+ExecStart="{executable_path}" {args}
+'''
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        timer_path = os.path.join(tmpdir, 'autotrash.timer')
+        service_path = os.path.join(tmpdir, 'autotrash.service')
+
+        with open(timer_path, 'w') as f:
+            f.write(timer_file)
+
+        with open(service_path, 'w') as f:
+            f.write(service_file)
+
+        subprocess.check_output(['sudo', 'mv', timer_path, '/etc/systemd/system/'])
+        subprocess.check_output(['sudo', 'mv', service_path, '/etc/systemd/system/'])
+        subprocess.check_output(['sudo', 'systemctl', 'enable', 'autotrash.timer'])
+        logging.info('autotrash.timer enabled')
+
+        logging.info('checking that the service is working...')
+        subprocess.check_output(['sudo', 'systemctl', 'start', 'autotrash'])
+        logging.info('service is working')
+
+
+
+
 def main():
     # Load and set configuration options
     parser = new_parser()
@@ -349,6 +412,11 @@ def main():
             __version__
         )
         return 1
+
+    if options.install:
+        install_service(options, args)
+        return 1
+
 
     check_options(parser, options)
 
