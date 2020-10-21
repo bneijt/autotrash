@@ -374,7 +374,6 @@ ExecStart="{executable_path}" {args}
     systemd_dir = os.path.expanduser('~/.config/systemd/user')
     os.makedirs(systemd_dir, exist_ok=True)
 
-
     with open(os.path.join(systemd_dir, 'autotrash.timer'), 'w') as f:
         f.write(timer_file)
 
@@ -382,7 +381,6 @@ ExecStart="{executable_path}" {args}
         f.write(service_file)
 
     logging.info(f'service installed to "{systemd_dir}"')
-
     subprocess.check_output(['systemctl', '--user', 'enable', 'autotrash.timer'])
     logging.info('checking that the service is working...')
     subprocess.check_output(['systemctl', '--user', 'start', 'autotrash'])
@@ -405,12 +403,11 @@ def main():
         )
         return 1
 
+    check_options(parser, options)
+
     if options.install:
         install_service(options, args)
         return 1
-
-
-    check_options(parser, options)
 
     # Compile list of possible trash directories
     trash_paths = find_trash_directories(options.trash_path, options.trash_mounts)
