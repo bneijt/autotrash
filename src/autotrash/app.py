@@ -25,9 +25,7 @@ import shutil
 import stat
 import sys
 import datetime
-import tempfile
 import subprocess
-import getpass
 from typing import Union
 
 import math
@@ -370,30 +368,25 @@ Description=Empty trash
 
 [Service]
 Type=oneshot
-User={getpass.getuser()}
 ExecStart="{executable_path}" {args}
 '''
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        timer_path = os.path.join(tmpdir, 'autotrash.timer')
-        service_path = os.path.join(tmpdir, 'autotrash.service')
-
-        with open(timer_path, 'w') as f:
-            f.write(timer_file)
-
-        with open(service_path, 'w') as f:
-            f.write(service_file)
-
-        subprocess.check_output(['sudo', 'mv', timer_path, '/etc/systemd/system/'])
-        subprocess.check_output(['sudo', 'mv', service_path, '/etc/systemd/system/'])
-        subprocess.check_output(['sudo', 'systemctl', 'enable', 'autotrash.timer'])
-        logging.info('autotrash.timer enabled')
-
-        logging.info('checking that the service is working...')
-        subprocess.check_output(['sudo', 'systemctl', 'start', 'autotrash'])
-        logging.info('service is working')
+    systemd_dir = os.path.expanduser('~/.config/systemd/user')
+    os.makedirs(systemd_dir, exist_ok=True)
 
 
+    with open(os.path.join(systemd_dir, 'autotrash.timer'), 'w') as f:
+        f.write(timer_file)
+
+    with open(os.path.join(systemd_dir, 'autotrash.service'), 'w') as f:
+        f.write(service_file)
+
+    logging.info(f'service installed to "{systemd_dir}"')
+
+    subprocess.check_output(['systemctl', '--user', 'enable', 'autotrash.timer'])
+    logging.info('checking that the service is working...')
+    subprocess.check_output(['systemctl', '--user', 'start', 'autotrash'])
+    logging.info('service is working')
 
 
 def main():

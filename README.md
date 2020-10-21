@@ -29,11 +29,11 @@ run `autotrash --install` to create a systemd service which runs daily with the 
 
 will run `/usr/bin/autotrash -d 30` daily.
 
-The service can be manually started with `systemctl start autotrash`.
-The timer can be enabled and disabled using `systemctl enable autotrash.timer` and
-`systemctl disable autotrash.timer` respectively.
+The service can be manually started with `systemctl --user start autotrash`.
+The timer can be enabled and disabled using `systemctl --user enable autotrash.timer` and
+`systemctl --user disable autotrash.timer` respectively.
 
-Only one autotrash service can exist on the machine and root access is required during installation so this option may not be appropriate for all use cases.
+The service is installed to `~/.config/systemd/user` so like the cron approach, root access is not required and multiple users have their own independent services.
 
 
 ## Manual Cron Setup ##
