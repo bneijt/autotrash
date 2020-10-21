@@ -10,7 +10,7 @@ trash information file.
 ![Travis CI build status](https://api.travis-ci.org/bneijt/autotrash.svg)
 
 Installation
-------------
+============
 
 On Fedora consider using `yum install autotrash`
 
@@ -20,8 +20,24 @@ Last option is to install autotrash using pip, for example, using: `pip install 
 
 
 Configuration
--------------
-It should be considered to be run as a crontab entry:
+=============
+
+## Automatic Setup ##
+run `autotrash --install` to create a systemd service which runs daily with the provided arguments. For example
+
+    autotrash -d 30 --install
+
+will run `/usr/bin/autotrash -d 30` daily.
+
+The service can be manually started with `systemctl start autotrash`.
+The timer can be enabled and disabled using `systemctl enable autotrash.timer` and
+`systemctl disable autotrash.timer` respectively.
+
+Only one autotrash service can exist on the machine and root access is required during installation so this option may not be appropriate for all use cases.
+
+
+## Manual Cron Setup ##
+To run autotrash daily using cron, add the following crontab entry:
 
     @daily /usr/bin/autotrash -d 30
 
@@ -36,12 +52,18 @@ Or more frequently, but to keep disk IO down, only when there is less then 3GB o
 To configure this, run "crontab -e" and add one of these lines in the
 editor, then save and close the file.
 
+
+## System Startup Setup ##
 If you do not know how to work with crontab, you could add it to the startup
 programs in GNOME using the menu: System -> Preferences -> Sessions
 
 Add the program with the "+ Add" button.
 
 This will make sure that your trash is cleaned up every time you log in.
+
+
+Information
+===========
 
 Homepage: https://github.com/bneijt/autotrash
 
@@ -51,6 +73,7 @@ Epel7 package is still in the testing repo but should go stable within few days.
 You can install the package on Fedora right now with:
 
     yum install autotrash
+
 
 Development
 ===========
