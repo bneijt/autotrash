@@ -362,14 +362,14 @@ Persistent=true
 WantedBy=timers.target
 '''
 
-    service_file = f'''\
+    service_file = '''\
 [Unit]
 Description=Empty trash
 
 [Service]
 Type=oneshot
-ExecStart="{executable_path}" {args}
-'''
+ExecStart="{}" {}
+'''.format(executable_path, args)
 
     systemd_dir = os.path.expanduser('~/.config/systemd/user')
     os.makedirs(systemd_dir, exist_ok=True)
@@ -380,7 +380,7 @@ ExecStart="{executable_path}" {args}
     with open(os.path.join(systemd_dir, 'autotrash.service'), 'w') as f:
         f.write(service_file)
 
-    logging.info(f'service installed to "{systemd_dir}"')
+    logging.info('service installed to "{}"'.format(systemd_dir))
     subprocess.check_output(['systemctl', '--user', 'enable', 'autotrash.timer'])
     logging.info('checking that the service is working...')
     subprocess.check_output(['systemctl', '--user', 'start', 'autotrash'])
