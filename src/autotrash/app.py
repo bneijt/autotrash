@@ -435,7 +435,7 @@ ExecStart="{}" {}
     logging.info("service is working")
 
 
-def main():
+def cli():
     # Load and set configuration options
     parser = new_parser()
     (options, args) = parser.parse_args()
@@ -499,6 +499,8 @@ def main():
         )
     return 0 if stats.failures == 0 else 1
 
+def main():
+    sys.exit(cli())
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
