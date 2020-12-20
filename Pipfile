@@ -1,4 +1,0 @@
-[packages]
-autotrash = {path = ".",editable = true,extras = ["testing"]}
-twine = "*"
-bleach = ">=3.1.4"

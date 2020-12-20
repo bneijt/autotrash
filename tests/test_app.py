@@ -9,20 +9,22 @@ import random
 mock_free_space_mb = 1000
 file_info_map = {}
 
+
 class OptionsClass:
-    days=1
-    trash_path=None
-    max_free=0
-    delete=0
-    min_free=0
-    verbose=True
-    quiet=False
-    check=False
-    dryrun=True
-    stat=False
-    delete_first=[]
-    version=False
-    trash_limit=0
+    days = 1
+    trash_path = None
+    max_free = 0
+    delete = 0
+    min_free = 0
+    verbose = True
+    quiet = False
+    check = False
+    dryrun = True
+    stat = False
+    delete_first = []
+    version = False
+    trash_limit = 0
+
 
 def mock_get_file_names(trash_info_path):
     keys = list(file_info_map.keys())
@@ -31,35 +33,43 @@ def mock_get_file_names(trash_info_path):
     random.shuffle(keys)
     return keys
 
+
 def mock_get_cur_time():
     return datetime.datetime(2000, 12, 25).timestamp()
+
 
 def mock_get_consumed_size(file_name):
     return file_info_map[file_name]["size"]
 
+
 def mock_get_trash_info_date(value: str) -> datetime.datetime:
-    return (datetime.datetime(2000, 12, 25) -
-            datetime.timedelta(days=file_info_map[value]["days_old"]))
+    return datetime.datetime(2000, 12, 25) - datetime.timedelta(
+        days=file_info_map[value]["days_old"]
+    )
 
 
 def mock_purge(trash_directory, trash_name, dryrun):
     file_info_map[trash_name]["deleted"] = True
     return
 
+
 class FsStat:
-    f_bsize=1024
-    f_bavail=1024*mock_free_space_mb
+    f_bsize = 1024
+    f_bavail = 1024 * mock_free_space_mb
+
 
 def mock_get_fs_stat(trash_info_path):
     fs_stat = FsStat()
     return fs_stat
 
+
 def add_mock_file(name, days_old, size_mb):
     file_info_map[name] = {
         "days_old": days_old,
-        "size" : size_mb * 1024*1024,
-        "deleted" : False,
+        "size": size_mb * 1024 * 1024,
+        "deleted": False,
     }
+
 
 def run_end_to_end(options, expected_deleted):
 
@@ -85,7 +95,7 @@ def run_end_to_end(options, expected_deleted):
     autotrash.process_path("", options, stats, os_access)
 
     for f in file_info_map:
-        if(file_info_map[f]["deleted"] == True):
+        if file_info_map[f]["deleted"] == True:
             assert f in expected_deleted
         else:
             assert f not in expected_deleted
@@ -93,6 +103,7 @@ def run_end_to_end(options, expected_deleted):
     # just to be extra sure
     for f in expected_deleted:
         assert file_info_map[f]["deleted"] == True
+
 
 # -------- "end-to-end" tests ----------
 
@@ -103,12 +114,14 @@ def test_nothing_deleted():
     expected_deleted = []
     run_end_to_end(options, expected_deleted)
 
+
 # old files deleted
 def test_old_files_deleted():
     options = OptionsClass()
     options.days = 1
     expected_deleted = ["d", "e", "f", "g"]
     run_end_to_end(options, expected_deleted)
+
 
 # files deleted due to --delete
 def test_deleted_with_delete():
@@ -118,6 +131,7 @@ def test_deleted_with_delete():
     expected_deleted = ["e", "f", "g"]
     run_end_to_end(options, expected_deleted)
 
+
 # same test with --min-free
 def test_deleted_with_min_free():
     options = OptionsClass()
@@ -125,6 +139,7 @@ def test_deleted_with_min_free():
     options.min_free = mock_free_space_mb + 6
     expected_deleted = ["e", "f", "g"]
     run_end_to_end(options, expected_deleted)
+
 
 # test --min-free doesn't delete when there is enough free space
 def test_nothing_deleted_with_min_free():
@@ -134,6 +149,7 @@ def test_nothing_deleted_with_min_free():
     expected_deleted = []
     run_end_to_end(options, expected_deleted)
 
+
 # test files deleted due to --trash-limit
 def test_deleted_with_trash_limit():
     options = OptionsClass()
@@ -141,6 +157,7 @@ def test_deleted_with_trash_limit():
     options.trash_limit = 4
     expected_deleted = ["d", "e", "f", "g"]
     run_end_to_end(options, expected_deleted)
+
 
 # test --trash-limit doesn't delete when the trash is not occupied enough
 def test_nothing_deleted_with_trash_limit():
@@ -150,7 +167,9 @@ def test_nothing_deleted_with_trash_limit():
     expected_deleted = []
     run_end_to_end(options, expected_deleted)
 
+
 # -------- original tests ----------
+
 
 def should_survive_zero_length_config():
     assert autotrash.get_trash_info_date(os.devnull) == None
@@ -159,9 +178,9 @@ def should_survive_zero_length_config():
 def should_survive_config_with_zeros():
     (temp_handle, temp_file_path) = tempfile.mkstemp()
     os.close(temp_handle)
-    with open(temp_file_path, 'wb') as tf:
+    with open(temp_file_path, "wb") as tf:
         print(repr(tf))
-        tf.write(b'\0x0\0x0\0x0\0x0')
+        tf.write(b"\0x0\0x0\0x0\0x0")
 
     try:
         autotrash.get_trash_info_date(temp_file_path) == None
@@ -170,8 +189,12 @@ def should_survive_config_with_zeros():
 
 
 def should_read_datetime_for_all_known_formats():
-    assert autotrash.read_datetime('2019-10-17T15:33:57') == datetime.datetime(2019, 10, 17, 15, 33, 57)
-    assert autotrash.read_datetime('2019-10-17T15:33:57.710Z') == datetime.datetime(2019, 10, 17, 15, 33, 57, 710000)
+    assert autotrash.read_datetime("2019-10-17T15:33:57") == datetime.datetime(
+        2019, 10, 17, 15, 33, 57
+    )
+    assert autotrash.read_datetime("2019-10-17T15:33:57.710Z") == datetime.datetime(
+        2019, 10, 17, 15, 33, 57, 710000
+    )
 
 
 def should_format_bytes_nicely():

@@ -10,3 +10,4 @@
 /build
 /dist
 /.vscode
+.pytest_cache
