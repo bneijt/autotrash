@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #   autotrash - GNOME GVFS Trash old file auto prune
 #
 #   Copyright (C) 2019 A. Bram Neijt <bneijt@gmail.com>
