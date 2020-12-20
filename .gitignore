@@ -7,3 +7,6 @@
 /.idea
 .eggs
 *.egg-info
+/build
+/dist
+/.vscode
