@@ -15,6 +15,8 @@ jobs:
         uses: abatilo/actions-poetry@v2.0.0
         with:
           poetry-version: 1.1.4
+      - name: Poetry install
+        run: poetry install
       - name: Check formatting
         run: poetry run black --check .
       - name: Run tests
