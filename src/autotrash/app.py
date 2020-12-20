@@ -499,8 +499,10 @@ def cli():
         )
     return 0 if stats.failures == 0 else 1
 
+
 def main():
     sys.exit(cli())
+
 
 if __name__ == "__main__":
     main()
