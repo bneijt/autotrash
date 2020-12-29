@@ -1,6 +1,6 @@
 # Maintainer: Bram Neijt <bram@neijt.nl>
 pkgname=autotrash
-pkgver=0.3.0
+pkgver=0.4.1
 pkgrel=1
 pkgdesc="Tool to automatically purge old trashed files"
 arch=("any")
@@ -13,7 +13,7 @@ conflicts=("autotrash")
 source=(
     https://files.pythonhosted.org/packages/source/${pkgname::1}/$pkgname/$pkgname-$pkgver.tar.gz
 )
-md5sums=('5005ed60bc6660b0668502136ac9c3c5')
+md5sums=('ac7eb2c3cc54fa7b5420c6e379b974e3')
 
 build() {
     cd "$srcdir/$pkgname-$pkgver"
