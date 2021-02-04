@@ -14,7 +14,9 @@ Installation
 
 On Fedora consider using `yum install autotrash`
 
-[On Ubuntu](http://packages.ubuntu.com/trusty/autotrash) and [Debian](https://packages.debian.org/search?keywords=autotrash&searchon=names&suite=stable&section=all) try to install it using `apt-get install autotrash`.
+[On Ubuntu](https://packages.ubuntu.com/search?suite=all&arch=any&searchon=names&keywords=autotrash) and [Debian](https://packages.debian.org/search?keywords=autotrash&searchon=names&suite=stable&section=all) try to install it using `apt-get install autotrash`.
+
+ArchLinux has an [AUR package available](https://aur.archlinux.org/packages/autotrash/). 
 
 Last option is to install autotrash using pip, for example, using: `pip install --user autotrash`
 
