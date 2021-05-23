@@ -2,10 +2,13 @@
 name = "autotrash"
 version = "0.0.0"
 description = "Script to automatically purge old trash"
-authors = ["A. Bram Neijt <bram@neijt.nl>"]
-license = "GPLv3"
+authors = ["Bram Neijt <bram@neijt.nl>"]
 readme = "README.md"
 repository = "https://github.com/bneijt/autotrash"
+classifiers = [
+    "Environment :: Console",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+]
 
 [tool.poetry.dependencies]
 python = "^3.6"
