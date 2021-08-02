@@ -411,6 +411,7 @@ WantedBy=timers.target
     service_file = """\
 [Unit]
 Description=Empty trash
+Documentation=https://github.com/bneijt/autotrash
 
 [Service]
 Type=oneshot
