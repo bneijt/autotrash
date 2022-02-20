@@ -1,13 +1,15 @@
-import os
-import tempfile
 import datetime
-import autotrash
+import os
 import random
+import tempfile
+from typing import Dict
+
+import autotrash
 
 # ------------- mock functions & helpers --------------
 
 mock_free_space_mb = 1000
-file_info_map = {}
+file_info_map = {}  # type: Dict[str, dict]
 
 
 class OptionsClass:
@@ -21,7 +23,7 @@ class OptionsClass:
     check = False
     dryrun = True
     stat = False
-    delete_first = []
+    delete_first = []  # type: list
     version = False
     trash_limit = 0
 
