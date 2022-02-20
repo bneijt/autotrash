@@ -11,18 +11,26 @@ jobs:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
     runs-on: ubuntu-latest
+    env:
+      POETRY_VIRTUALENVS_IN_PROJECT: true
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install poetry
-        run: pip install poetry==1.1.4 poetry-core==1.0.0
-      - name: Poetry install
-        run: poetry install
-      - name: Check formatting
-        run: poetry run black --check .
-      - name: Run tests
+        run: pip install poetry==1.1.12
+      - name: cache venv
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      - run: poetry install
+      - name: static analysis
+        run: |
+          poetry run black --check src tests
+          poetry run mypy src tests
+      - name: run tests
         run: |
           poetry run pytest
           poetry run autotrash --help

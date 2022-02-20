@@ -16,21 +16,21 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program. If not, see <http://www.gnu.org/licenses/>.
 import configparser
+import datetime
 import errno
 import logging
+import math
 import optparse
 import os
 import re
 import shutil
 import stat
-import sys
-import datetime
 import subprocess
+import sys
 from typing import Union
 
-import math
 from autotrash import __version__
-from autotrash.options import new_parser, check_options
+from autotrash.options import check_options, new_parser
 
 # custom logging level between DEBUG and INFO
 VERBOSE = 15
