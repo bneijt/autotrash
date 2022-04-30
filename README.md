@@ -69,6 +69,17 @@ Add the program with the "+ Add" button.
 
 This will make sure that your trash is cleaned up every time you log in.
 
+## ~/.gnomerc ##
+
+You can create a script thats run at login to Gnome: `~/.gnomerc`. One advantage to this method is ability to have different rules for various trash folders. For example:
+```
+#!/bin/bash
+# Empty homedir trash
+autotrash --days 30 --trash-path=~/.local/share/Trash
+# Empty trash for non-home folders:
+autotrash --days 10 --trash-path=/dpool/vcmain/.Trash-`id -u`
+autotrash --days 15 --trash-path=/dpool/vccorp/.Trash-`id -u`
+```
 
 General information
 ===========
