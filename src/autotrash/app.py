@@ -384,11 +384,11 @@ def process_path(trash_info_path, options, stats, os_access) -> int:
 def install_service(options, args):
     if shutil.which("systemctl") is None:
         logging.error("system must support systemd to use --install")
-        return
+        return 1
 
     if options.dryrun:
         logging.error("cannot install with --dry-run enabled")
-        return
+        return 1
 
     executable_path = shutil.which("autotrash")
     if executable_path is None:
@@ -435,6 +435,8 @@ ExecStart="{}" {}
     subprocess.check_output(["systemctl", "--user", "start", "autotrash"])
     logging.info("service is working")
 
+    return 0
+
 
 def cli():
     # Load and set configuration options
@@ -455,8 +457,7 @@ def cli():
     check_options(parser, options)
 
     if options.install:
-        install_service(options, args)
-        return 1
+        return install_service(options, args)
 
     # Compile list of possible trash directories
     trash_paths = find_trash_directories(options.trash_path, options.trash_mounts)
