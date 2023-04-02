@@ -12,7 +12,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.x"
+          python-version: "3.10"
       - name: Install poetry
         run: pip install poetry==1.4.1
       - name: Poetry install
