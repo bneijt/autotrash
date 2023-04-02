@@ -15,6 +15,9 @@ jobs:
       POETRY_VIRTUALENVS_IN_PROJECT: true
     steps:
       - uses: actions/checkout@v3
+      - uses: google/osv-scanner/actions/scanner@main
+        with:
+          to-scan: poetry.lock
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
