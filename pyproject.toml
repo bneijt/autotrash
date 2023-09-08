@@ -19,6 +19,7 @@ black = "^23.7.0"
 twine = "^4.0.2"
 mypy = "^1.5.1"
 types-setuptools = "^68.2.0.0"
+pre-commit = "^3.4.0"
 
 [tool.poetry.scripts]
 autotrash = 'autotrash.app:main'
