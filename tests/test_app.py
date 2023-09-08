@@ -3,7 +3,7 @@ import os
 import random
 import tempfile
 
-import autotrash
+from autotrash import app
 
 # ------------- mock functions & helpers --------------
 
@@ -75,8 +75,8 @@ def add_mock_file(name, days_old, size_mb):
 def run_end_to_end(options, expected_deleted):
     file_info_map.clear()
 
-    stats = autotrash.StatsClass()
-    os_access = autotrash.OsAccess()
+    stats = app.StatsClass()
+    os_access = app.OsAccess()
     os_access.get_file_names = mock_get_file_names
     os_access.get_cur_time = mock_get_cur_time
     os_access.get_consumed_size = mock_get_consumed_size
@@ -92,7 +92,7 @@ def run_end_to_end(options, expected_deleted):
     add_mock_file("f", 3, 2)
     add_mock_file("g", 3.1, 3)
 
-    autotrash.process_path("", options, stats, os_access)
+    app.process_path("", options, stats, os_access)
 
     for f in file_info_map:
         if file_info_map[f]["deleted"] is True:
@@ -173,7 +173,7 @@ def test_nothing_deleted_with_trash_limit():
 
 
 def should_survive_zero_length_config():
-    assert autotrash.get_trash_info_date(os.devnull) is None
+    assert app.get_trash_info_date(os.devnull) is None
 
 
 def should_survive_config_with_zeros():
@@ -184,22 +184,22 @@ def should_survive_config_with_zeros():
         tf.write(b"\0x0\0x0\0x0\0x0")
 
     try:
-        autotrash.get_trash_info_date(temp_file_path) is None
+        app.get_trash_info_date(temp_file_path) is None
     finally:
         os.unlink(temp_file_path)
 
 
 def should_read_datetime_for_all_known_formats():
-    assert autotrash.read_datetime("2019-10-17T15:33:57") == datetime.datetime(
+    assert app.read_datetime("2019-10-17T15:33:57") == datetime.datetime(
         2019, 10, 17, 15, 33, 57
     )
-    assert autotrash.read_datetime("2019-10-17T15:33:57.710Z") == datetime.datetime(
+    assert app.read_datetime("2019-10-17T15:33:57.710Z") == datetime.datetime(
         2019, 10, 17, 15, 33, 57, 710000
     )
 
 
 def should_format_bytes_nicely():
-    assert autotrash.fmt_bytes(10) == "10 bytes"
-    assert autotrash.fmt_bytes(1024) == "1.0 KiB"
-    assert autotrash.fmt_bytes(1024 * 1024) == "1.0 MiB"
-    assert autotrash.fmt_bytes(1024 * 1024 + 512 * 1024) == "1.5 MiB"
+    assert app.fmt_bytes(10) == "10 bytes"
+    assert app.fmt_bytes(1024) == "1.0 KiB"
+    assert app.fmt_bytes(1024 * 1024) == "1.0 MiB"
+    assert app.fmt_bytes(1024 * 1024 + 512 * 1024) == "1.5 MiB"
