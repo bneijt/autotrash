@@ -14,7 +14,7 @@ jobs:
         with:
           python-version: "3.10"
       - name: Install poetry
-        run: pip install poetry==1.4.1
+        run: pip install poetry==1.6.1
       - name: Poetry install
         run: poetry install
       - name: Build and publish
