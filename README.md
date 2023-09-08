@@ -17,12 +17,14 @@ Using a distribution package is preferred as it will also ensure that autotrash 
 
 - Using the a package manager:
     - On Fedora consider using `yum install autotrash`
-    - [On Ubuntu](https://packages.ubuntu.com/search?suite=all&arch=any&searchon=names&keywords=autotrash) using `sudo apt-get install autotrash`
-    - [On Debian](https://packages.debian.org/search?keywords=autotrash&searchon=names&suite=stable&section=all) using `sudo apt-get install autotrash`.
+    - On Ubuntu and Debian, using `pipx`:
+        ```
+        sudo apt-get install pipx
+        pipx install autotrash
+        ```
     - On ArchLinux, there is an [AUR package available](https://aur.archlinux.org/packages/autotrash/)
 
-Finally you could install it using `pip` directly, which will install it to your home in the folder `~/.local/bin`, using `pip install --user autotrash`.
-
+Finally you could try using `pip` directly if `pipx` is not available.
 
 Configuration
 =============
