@@ -2,13 +2,12 @@ import datetime
 import os
 import random
 import tempfile
-
 from autotrash import app
 
 # ------------- mock functions & helpers --------------
 
 mock_free_space_mb = 1000
-file_info_map = {}  # type: dict[str, dict]
+file_info_map = {}  # type: Dict[str, dict]
 
 
 class OptionsClass:
@@ -190,9 +189,7 @@ def should_survive_config_with_zeros():
 
 
 def should_read_datetime_for_all_known_formats():
-    assert app.read_datetime("2019-10-17T15:33:57") == datetime.datetime(
-        2019, 10, 17, 15, 33, 57
-    )
+    assert app.read_datetime("2019-10-17T15:33:57") == datetime.datetime(2019, 10, 17, 15, 33, 57)
     assert app.read_datetime("2019-10-17T15:33:57.710Z") == datetime.datetime(
         2019, 10, 17, 15, 33, 57, 710000
     )

@@ -20,7 +20,6 @@ import datetime
 import errno
 import logging
 import math
-import optparse
 import os
 import re
 import shutil
@@ -48,10 +47,13 @@ def on_remove_error(function, path, excinfo):
     if excinfo[0] == errno.EPERM:
         # Permission errors, try a chmod to recover
         if function == os.remove:
-            # Tried to remove a file, but failed. Try to change the write permissions of the tree to delete it
+            # Tried to remove a file, but failed.
+            # Try to change the write permissions of the tree to delete it
             logging.log(
                 VERBOSE,
-                "Failed to remove file at: %s\n\tgot exception: %s\n\tchanging permissions and trying again.",
+                "Failed to remove file at: %s\n"
+                "\tgot exception: %s\n"
+                "\tchanging permissions and trying again.",
                 path,
                 str(excinfo),
             )
@@ -59,10 +61,13 @@ def on_remove_error(function, path, excinfo):
             os.unlink(path)
             return
         if function == os.rmdir:
-            # Tried to remove a directory, but failed. Try to change the write permissions of the tree to delete it
+            # Tried to remove a directory, but failed.
+            # Try to change the write permissions of the tree to delete it
             logging.log(
                 VERBOSE,
-                "Failed to remove directory at: %s\n\tgot exception: %s\n\tchanging permissions and trying again.",
+                "Failed to remove directory at: %s\n"
+                "\tgot exception: %s\n"
+                "\tchanging permissions and trying again.",
                 path,
                 str(excinfo),
             )
@@ -243,8 +248,7 @@ def process_path(trash_info_path, options, stats, os_access) -> int:
         if fs_stat.f_bsize <= 0:
             logging.error(
                 "Can not determine free space because the returned filesystem block size was %i\n"
-                "The --max-free option may not be supported for this filesystem."
-                % fs_stat.f_bsize
+                "The --max-free option may not be supported for this filesystem." % fs_stat.f_bsize
             )
             return 1
         free_megabytes = int((fs_stat.f_bavail * fs_stat.f_bsize) / (1024 * 1024))
@@ -299,9 +303,7 @@ def process_path(trash_info_path, options, stats, os_access) -> int:
                 return 0
             file_info["time"] = file_time.timestamp()
             file_info["age_seconds"] = os_access.get_cur_time() - file_info["time"]
-            file_info["age_days"] = int(
-                math.floor(file_info["age_seconds"] / (3600.0 * 24.0))
-            )
+            file_info["age_days"] = int(math.floor(file_info["age_seconds"] / (3600.0 * 24.0)))
 
             if options.stat or options.delete or options.trash_limit:
                 # calculating file size is relatively expensive; only do it if needed
@@ -447,9 +449,7 @@ def cli():
 
     if options.version:
         logging.info(
-            "Version %s\n"
-            "Copyright (C) 2019 Bram Neijt <bram@neijt.nl>\n"
-            "License GPLv3+",
+            "Version %s\n" "Copyright (C) 2019 Bram Neijt <bram@neijt.nl>\n" "License GPLv3+",
             __version__,
         )
         return 1
@@ -476,9 +476,7 @@ def cli():
     for trash_path in trash_paths:
         trash_info_path = os.path.expanduser(os.path.join(trash_path, "info"))
         if not os.path.exists(trash_info_path):
-            logging.error(
-                "Can not find trash information directory: %s", trash_info_path
-            )
+            logging.error("Can not find trash information directory: %s", trash_info_path)
             return 1
 
         if process_path(trash_info_path, options, stats, os_access):
@@ -491,9 +489,7 @@ def cli():
             stats.total_files,
             fmt_bytes(stats.total_size),
         )
-        logging.info(
-            " -%6d deleted (%s)", stats.deleted_files, fmt_bytes(stats.deleted_size)
-        )
+        logging.info(" -%6d deleted (%s)", stats.deleted_files, fmt_bytes(stats.deleted_size))
         logging.info(
             " =%6d remaining (%s)",
             (stats.total_files - stats.deleted_files),
