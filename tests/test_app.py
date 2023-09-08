@@ -2,14 +2,13 @@ import datetime
 import os
 import random
 import tempfile
-from typing import Dict
 
 import autotrash
 
 # ------------- mock functions & helpers --------------
 
 mock_free_space_mb = 1000
-file_info_map = {}  # type: Dict[str, dict]
+file_info_map = {}  # type: dict[str, dict]
 
 
 class OptionsClass:
@@ -74,7 +73,6 @@ def add_mock_file(name, days_old, size_mb):
 
 
 def run_end_to_end(options, expected_deleted):
-
     file_info_map.clear()
 
     stats = autotrash.StatsClass()
@@ -97,17 +95,18 @@ def run_end_to_end(options, expected_deleted):
     autotrash.process_path("", options, stats, os_access)
 
     for f in file_info_map:
-        if file_info_map[f]["deleted"] == True:
+        if file_info_map[f]["deleted"] is True:
             assert f in expected_deleted
         else:
             assert f not in expected_deleted
 
     # just to be extra sure
     for f in expected_deleted:
-        assert file_info_map[f]["deleted"] == True
+        assert file_info_map[f]["deleted"] is True
 
 
 # -------- "end-to-end" tests ----------
+
 
 # nothing deleted
 def test_nothing_deleted():
@@ -174,7 +173,7 @@ def test_nothing_deleted_with_trash_limit():
 
 
 def should_survive_zero_length_config():
-    assert autotrash.get_trash_info_date(os.devnull) == None
+    assert autotrash.get_trash_info_date(os.devnull) is None
 
 
 def should_survive_config_with_zeros():
@@ -185,7 +184,7 @@ def should_survive_config_with_zeros():
         tf.write(b"\0x0\0x0\0x0\0x0")
 
     try:
-        autotrash.get_trash_info_date(temp_file_path) == None
+        autotrash.get_trash_info_date(temp_file_path) is None
     finally:
         os.unlink(temp_file_path)
 
