@@ -13,10 +13,14 @@ Installation
 
 There are mulitple ways to install the software. Either using your Linux distribution package manager (if a package is available) or using the Python package directly.
 
-Using a distribution package is preferred as it will also ensure that autotrash is updated during your regular updates, however not all distributions have autotrash available as a package, so you may need ot use python directly anyway.
+Using a distribution package is preferred as it will also ensure that autotrash is updated during your regular updates, however not all distributions have autotrash available as a package, so you may need to use python directly anyway.
 
 - Using the a package manager:
-    - On Fedora consider using `yum install autotrash`
+    - On Fedora, using `pipx`:
+        ```
+        sudo dnf install pipx
+        pipx install autotrash
+        ```
     - On Ubuntu and Debian, using `pipx`:
         ```
         sudo apt-get install pipx
