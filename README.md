@@ -32,6 +32,11 @@ Using a distribution package is preferred as it will also ensure that autotrash 
 
 Finally you could try using `pip` directly if `pipx` is not available.
 
+In case of distro upgrade, please force reinstallation, otherwise you could get **module not found** error:
+```
+pipx install --force autotrash
+```
+
 Configuration
 =============
 
