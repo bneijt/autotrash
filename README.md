@@ -112,4 +112,4 @@ Or by using the shell:
     poetry shell
     autotrash --help
 
-All pull requests and master builds are tested using github actions and require [`black`](https://github.com/psf/black) formatting.
+All pull requests and master builds are tested using github actions and require pre-commit to succeed.
