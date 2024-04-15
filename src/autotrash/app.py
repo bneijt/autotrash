@@ -418,9 +418,7 @@ Documentation=https://github.com/bneijt/autotrash
 [Service]
 Type=oneshot
 ExecStart="{}" {}
-""".format(
-        executable_path, args
-    )
+""".format(executable_path, args)
 
     systemd_dir = os.path.expanduser("~/.config/systemd/user")
     os.makedirs(systemd_dir, exist_ok=True)

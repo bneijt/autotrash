@@ -31,7 +31,7 @@ jobs:
       - run: poetry install
       - name: static analysis
         run: |
-          poetry run black --check src tests
+          poetry run -- pre-commit run --all-files
           poetry run mypy src tests
       - name: run tests
         run: |

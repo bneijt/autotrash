@@ -3,6 +3,7 @@ import os
 import random
 import tempfile
 from typing import Dict
+
 from autotrash import app
 
 # ------------- mock functions & helpers --------------
