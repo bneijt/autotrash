@@ -14,13 +14,13 @@ classifiers = [
 python = ">=3.8, <4"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.2"
-black = "^23.7.0"
-twine = "^4.0.2"
+pytest = "^8.1.1"
+black = "^24.4.0"
+twine = "^5.0.0"
 mypy = "^1.5.1"
 types-setuptools = "^68.2.0.0"
 pre-commit = "^3.4.0"
-ruff = "^0.0.287"
+ruff = "^0.3.7"
 
 [tool.poetry.scripts]
 autotrash = 'autotrash.app:main'
