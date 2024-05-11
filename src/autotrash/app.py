@@ -420,7 +420,8 @@ Type=oneshot
 ExecStart="{}" {}
 """.format(executable_path, args)
 
-    systemd_dir = os.path.expanduser("~/.config/systemd/user")
+    config_dir = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
+    systemd_dir = f"{config_dir}/systemd/user"
     os.makedirs(systemd_dir, exist_ok=True)
 
     with open(os.path.join(systemd_dir, "autotrash.timer"), "w") as f:
