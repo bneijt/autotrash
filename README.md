@@ -28,6 +28,8 @@ Using a distribution package is preferred as it will also ensure that autotrash 
         ```
     - On ArchLinux, there is an [AUR package available](https://aur.archlinux.org/packages/autotrash/)
 
+    - On NixOS (or any system with `nix`), there is the `python3Packages.autotrash` package in nixpkgs-unstable
+
 Finally you could try using `pip` directly if `pipx` is not available.
 
 Configuration
