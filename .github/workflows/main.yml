@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install poetry
-        run: pip install poetry==1.6.1
+        run: pip install poetry==1.8.3
       - name: cache venv
         uses: actions/cache@v3
         with:

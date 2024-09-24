@@ -12,9 +12,9 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.12"
       - name: Install poetry
-        run: pip install poetry==1.6.1
+        run: pip install poetry==1.8.3 twine==5.1.1
       - name: Poetry install
         run: poetry install
       - name: Build and publish
@@ -24,4 +24,4 @@ jobs:
         run: |
           poetry version ${{ github.event.release.tag_name }}
           poetry build
-          poetry run twine upload dist/*
+          twine upload dist/*
