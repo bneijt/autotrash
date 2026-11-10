@@ -447,11 +447,11 @@ def cli():
     configure_logging(options)
 
     if options.version:
-        logging.info(
-            "Version %s\n" "Copyright (C) 2019 Bram Neijt <bram@neijt.nl>\n" "License GPLv3+",
-            __version__,
+        print(
+            "Version %s\n" "Copyright (C) 2019 Bram Neijt <bram@neijt.nl>\n" "License GPLv3+"
+            % __version__
         )
-        return 1
+        return 0
 
     check_options(parser, options)
 

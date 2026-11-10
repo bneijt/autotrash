@@ -1,6 +1,7 @@
 import datetime
 import os
 import random
+import sys
 import tempfile
 from typing import Dict
 
@@ -202,3 +203,10 @@ def should_format_bytes_nicely():
     assert app.fmt_bytes(1024) == "1.0 KiB"
     assert app.fmt_bytes(1024 * 1024) == "1.0 MiB"
     assert app.fmt_bytes(1024 * 1024 + 512 * 1024) == "1.5 MiB"
+
+
+def test_version_flag_exits_zero(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", ["autotrash", "--version"])
+    assert app.cli() == 0
+    out, _ = capsys.readouterr()
+    assert app.__version__ in out
