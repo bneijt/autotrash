@@ -1,8 +1,9 @@
 import datetime
 import os
 import random
+import sys
 import tempfile
-from typing import Dict
+from typing import Dict, Optional
 
 from autotrash import app
 
@@ -44,9 +45,17 @@ def mock_get_consumed_size(file_name):
     return file_info_map[file_name]["size"]
 
 
-def mock_get_trash_info_date(value: str) -> datetime.datetime:
+def mock_get_trash_info_date(value: str) -> Optional[datetime.datetime]:
+    days_old = file_info_map[value]["days_old"]
+    if days_old is None:
+        # a .trashinfo file that does not parse
+        return None
+    return datetime.datetime(2000, 12, 25) - datetime.timedelta(days=days_old)
+
+
+def mock_get_modified_time(path: str) -> datetime.datetime:
     return datetime.datetime(2000, 12, 25) - datetime.timedelta(
-        days=file_info_map[value]["days_old"]
+        days=file_info_map[path]["modified_days_old"]
     )
 
 
@@ -73,7 +82,7 @@ def add_mock_file(name, days_old, size_mb):
     }
 
 
-def run_end_to_end(options, expected_deleted):
+def run_end_to_end(options, expected_deleted, unreadable=()):
     file_info_map.clear()
 
     stats = app.StatsClass()
@@ -83,6 +92,7 @@ def run_end_to_end(options, expected_deleted):
     os_access.get_consumed_size = mock_get_consumed_size
     os_access.get_fs_stat = mock_get_fs_stat
     os_access.get_trash_info_date = mock_get_trash_info_date
+    os_access.get_modified_time = mock_get_modified_time
     os_access.purge = mock_purge
 
     add_mock_file("a", 0, 1)
@@ -92,6 +102,10 @@ def run_end_to_end(options, expected_deleted):
     add_mock_file("e", 2.1, 3)
     add_mock_file("f", 3, 2)
     add_mock_file("g", 3.1, 3)
+    for name, modified_days_old in unreadable:
+        # a .trashinfo that does not parse, written modified_days_old days ago
+        add_mock_file(name, None, 1)
+        file_info_map[name]["modified_days_old"] = modified_days_old
 
     app.process_path("", options, stats, os_access)
 
@@ -104,6 +118,8 @@ def run_end_to_end(options, expected_deleted):
     # just to be extra sure
     for f in expected_deleted:
         assert file_info_map[f]["deleted"] is True
+
+    return stats
 
 
 # -------- "end-to-end" tests ----------
@@ -168,6 +184,39 @@ def test_nothing_deleted_with_trash_limit():
     options.trash_limit = 20
     expected_deleted = []
     run_end_to_end(options, expected_deleted)
+
+
+# an unreadable .trashinfo ages from when it was written, the rest is processed as usual
+def test_unreadable_trash_info_ages_from_when_it_was_written():
+    options = OptionsClass()
+    options.days = 1
+    expected_deleted = ["d", "e", "f", "g", "unreadable-old"]
+    stats = run_end_to_end(
+        options, expected_deleted, unreadable=[("unreadable-old", 3), ("unreadable-new", 0)]
+    )
+    assert stats.failures == 0
+
+
+# same, on a real trash directory: empty .trashinfo files, as left by an interrupted trash-put
+def test_unreadable_trash_info_does_not_stop_its_trash_directory(tmp_path, monkeypatch):
+    trash = tmp_path / "Trash"
+    (trash / "info").mkdir(parents=True)
+    (trash / "files").mkdir()
+    sixty_days_ago = datetime.datetime.now() - datetime.timedelta(days=60)
+    (trash / "info" / "old-file.trashinfo").write_text(
+        f"[Trash Info]\nPath=/x/old-file\nDeletionDate={sixty_days_ago:%Y-%m-%dT%H:%M:%S}\n"
+    )
+    (trash / "files" / "old-file").write_text("data")
+    (trash / "info" / "old-half-written.trashinfo").write_text("")
+    os.utime(trash / "info" / "old-half-written.trashinfo", (sixty_days_ago.timestamp(),) * 2)
+    (trash / "files" / "old-half-written").write_text("x")
+    (trash / "info" / "new-half-written.trashinfo").write_text("")
+    (trash / "files" / "new-half-written").write_text("x")
+    monkeypatch.setattr(sys, "argv", ["autotrash", "--trash-path", str(trash), "-d", "29"])
+
+    assert app.cli() == 0
+    assert os.listdir(trash / "info") == ["new-half-written.trashinfo"]
+    assert os.listdir(trash / "files") == ["new-half-written"]
 
 
 # -------- original tests ----------
