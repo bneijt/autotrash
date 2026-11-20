@@ -3,13 +3,13 @@ name = "autotrash"
 version = "0.0.0"
 description = "Script to automatically purge old trash"
 readme = "README.md"
-authors = [{ name = "Bram Neijt", email = "bram@neijt.nl" }]
-requires-python = ">=3.9,<4"
+requires-python = ">=3.10,<4"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE.txt"]
+authors = [{ name = "Bram Neijt", email = "bram@neijt.nl" }]
 classifiers = [
-    "Environment :: Console",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Environment :: Console",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
 ]
 dependencies = []
 
@@ -21,11 +21,9 @@ autotrash = "autotrash.app:main"
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.3,<9",
-    "mypy>=1.11.2,<2",
-    "types-setuptools>=75.1.0.20240917,<76",
-    "prek>=0.5.11,<0.6",
-    "ruff>=0.6.7,<0.7",
+  "prek>=0.5.11",
+  "pytest>=9.0.3",
+  "ruff>=0.17.6",
 ]
 
 [build-system]

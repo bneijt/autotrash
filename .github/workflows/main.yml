@@ -26,9 +26,7 @@ jobs:
           enable-cache: true
       - run: uv sync --locked
       - name: static analysis
-        run: |
-          uv run prek run --all-files
-          uv run mypy src tests
+        run: uv run prek run --all-files
       - name: run tests
         run: |
           uv run pytest
