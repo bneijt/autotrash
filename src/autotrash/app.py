@@ -140,7 +140,7 @@ def get_trash_info_date(fname: str) -> Union[datetime.datetime, None]:
             # Read the file successfully, parse the DeletionDate
             return read_datetime(parser.get(section, key))
     except Exception as e:
-        # Error because exit status will be >0 because of this
+        # The item then ages from the modification time of this file instead
         logging.error("Failed to read %s: %s", fname, e)
     return None
 
@@ -233,12 +233,17 @@ def get_cur_time():
     return datetime.datetime.now().timestamp()
 
 
+def get_modified_time(path: str) -> datetime.datetime:
+    return datetime.datetime.fromtimestamp(os.stat(path).st_mtime)
+
+
 class OsAccess:
     get_file_names = None
     get_cur_time = None
     get_fs_stat = None
     get_consumed_size = None
     get_trash_info_date = None
+    get_modified_time = None
     purge = None
 
 
@@ -294,13 +299,16 @@ def process_path(trash_info_path, options, stats, os_access) -> int:
 
             file_time = os_access.get_trash_info_date(file_name)
             if not file_time:
-                # This happens when a trashinfo file is corrupted (issue #9)
+                # This happens when a trashinfo file is corrupted (issue #9). Only this item
+                # lacks a deletion date: it ages from when its trash info file was written,
+                # and every other item is still processed.
+                file_time = os_access.get_modified_time(file_name)
                 logging.warning(
-                    "Failed to read trash info for real file: %s",
+                    "Failed to read trash info for real file: %s; "
+                    "it ages from %s, when its trash info was written",
                     file_info["real_file"],
+                    file_time.isoformat(),
                 )
-                stats.failures += 1
-                return 0
             file_info["time"] = file_time.timestamp()
             file_info["age_seconds"] = os_access.get_cur_time() - file_info["time"]
             file_info["age_days"] = int(math.floor(file_info["age_seconds"] / (3600.0 * 24.0)))
@@ -470,6 +478,7 @@ def cli():
     os_access.get_fs_stat = get_fs_stat
     os_access.get_consumed_size = get_consumed_size
     os_access.get_trash_info_date = get_trash_info_date
+    os_access.get_modified_time = get_modified_time
     os_access.purge = purge
 
     for trash_path in trash_paths:
