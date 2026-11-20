@@ -5,6 +5,7 @@
 /doc/autotrash.1
 *.pyc
 /.idea
+.venv
 .eggs
 *.egg-info
 /build
