@@ -6,34 +6,28 @@ on:
   pull_request: {}
 
 jobs:
+  osv-scan:
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.7.1"
+    permissions:
+      security-events: write
   main:
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
     runs-on: ubuntu-latest
-    env:
-      POETRY_VIRTUALENVS_IN_PROJECT: true
     steps:
-      - uses: actions/checkout@v3
-      - uses: google/osv-scanner/actions/scanner@main
-        with:
-          to-scan: poetry.lock
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install poetry
-        run: pip install poetry==1.8.3
-      - name: cache venv
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-      - run: poetry install
+          enable-cache: true
+      - run: uv sync --locked
       - name: static analysis
         run: |
-          poetry run -- pre-commit run --all-files
-          poetry run mypy src tests
+          uv run prek run --all-files
+          uv run mypy src tests
       - name: run tests
         run: |
-          poetry run pytest
-          poetry run autotrash --help
+          uv run pytest
+          uv run autotrash --help
