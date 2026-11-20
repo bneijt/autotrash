@@ -3,7 +3,8 @@ name: main
 on:
   push:
     branches: [$default-branch]
-  pull_request: {}
+  pull_request:
+    branches: [$default-branch]
 
 jobs:
   osv-scan:
