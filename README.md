@@ -110,13 +110,14 @@ You can install the package on Fedora right now with:
 Development
 ===========
 
-The `autotrash` command is created as a script, using `poetry` you can run the current implementation using:
+The `autotrash` command is created as a script. Using `uv` you can run the current implementation using:
 
-    poetry run autotrash
+    uv run autotrash
 
-Or by using the shell:
+Or by activating the virtual environment:
 
-    poetry shell
+    uv sync
+    source .venv/bin/activate
     autotrash --help
 
-All pull requests and master builds are tested using github actions and require pre-commit to succeed.
+All pull requests and master builds are tested using github actions and require prek to succeed.

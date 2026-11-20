@@ -6,34 +6,28 @@ on:
   pull_request: {}
 
 jobs:
+  osv-scan:
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.7.1"
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
   main:
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.12", "3.15"]
     runs-on: ubuntu-latest
-    env:
-      POETRY_VIRTUALENVS_IN_PROJECT: true
     steps:
-      - uses: actions/checkout@v3
-      - uses: google/osv-scanner/actions/scanner@main
-        with:
-          to-scan: poetry.lock
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install uv
+        uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install poetry
-        run: pip install poetry==1.8.3
-      - name: cache venv
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-      - run: poetry install
+          enable-cache: true
+      - run: uv sync --locked
       - name: static analysis
-        run: |
-          poetry run -- pre-commit run --all-files
-          poetry run mypy src tests
+        run: uv run prek run --all-files
       - name: run tests
         run: |
-          poetry run pytest
-          poetry run autotrash --help
+          uv run pytest
+          uv run autotrash --help
